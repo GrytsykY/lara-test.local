@@ -14,7 +14,8 @@ class UrlController extends Controller
      */
     public function index()
     {
-        return view('urls.index');
+        $urls = Url::all();
+        return view('urls.index', compact('urls'));
     }
 
     /**
@@ -35,7 +36,19 @@ class UrlController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $url = new Url;
+
+        $url->url = $request->url;
+        $url->time = $request->time;
+        $url->count_inquiry = 45;//$request->count_inquiry;
+        $url->count_query_url = 23;$request->count_query_url;
+        $url->choice = $request->choice;
+        $url->id_user = 1;
+
+        $url->save();
+
+        return response()->json(['success'=>'Form is successfully submitted!']);
+//        return redirect()->route('url.index')->with('success','Post created successfully.');
     }
 
     /**
@@ -46,7 +59,8 @@ class UrlController extends Controller
      */
     public function show(Url $urls)
     {
-        //
+//        return view('urls.show',compact('urls'));
+        return redirect('index', $urls);
     }
 
     /**

@@ -20,7 +20,8 @@ Route::get('/', function () {
 });
 
 Route::get('/test', [TestController::class, 'index']);
-Route::get('/url', [UrlController::class, 'index']);
+
+Route::resource('/url', UrlController::class)->middleware(['auth']);
 
 
 Route::get('/dashboard', function () {
