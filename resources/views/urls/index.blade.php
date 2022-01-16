@@ -1,117 +1,91 @@
-@extends('layouts.myApp')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight text-center">
+            {{ __('Панель пользователя') }}
+        </h2>
+    </x-slot>
 
 
-@section('title','Url')
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <div class="container mt-8">
 
-@include('layouts.myNavigation')
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="row">
+                            <div class="col-5">
+                                <div>
+                                    <label id="url_check1">Введите url</label><br>
+                                    <input id="url_check" class="" name="url" type="text" value="">
 
-@section('content')
-
-    <div class="container mt-8">
-        <div class="row">
-            <div class="col-5">
-
-                <label>Введите url</label><br>
-                <input id="url" class="" name="url" type="text" value="">
-                <button id="check_url_btn" class="btn btn-primary" type="button"
-                         style="background-color: #2563eb">CHECK
-                </button>
-                <br>
-
-                <label>Введите название</label><br>
-                <input id="name" class="" name="title" type="text" value=""><br>
-                <label>Введите время</label><br>
-                <input id="time" class="" name="time" type="number" max="40" value=""><br><br>
-
-{{--                <div class="form-check">--}}
-{{--                    <input class="form-check-input" type="radio" name="exampleRadios"--}}
-{{--                           id=""--}}
-{{--                           value="option1"--}}
-{{--                           checked>--}}
-{{--                    <label class="form-check-label" for="exampleRadios1">--}}
-{{--                        Success--}}
-{{--                    </label>--}}
-{{--                </div>--}}
-{{--                <div class="form-check">--}}
-{{--                    <input class="form-check-input" type="radio" name="exampleRadios"--}}
-{{--                           id="exampleRadios2"--}}
-{{--                           value="option2">--}}
-{{--                    <label class="form-check-label" for="exampleRadios2">--}}
-{{--                        Warning--}}
-{{--                    </label>--}}
-{{--                </div>--}}
-{{--                <div class="form-check">--}}
-{{--                    <input class="form-check-input" type="radio" name="exampleRadios"--}}
-{{--                           id="exampleRadios3"--}}
-{{--                           value="option3">--}}
-{{--                    <label class="form-check-label" for="exampleRadios3">--}}
-{{--                        Warning +--}}
-{{--                    </label>--}}
-{{--                </div>--}}
-{{--                <div class="form-check">--}}
-{{--                    <input class="form-check-input" type="radio" name="exampleRadios"--}}
-{{--                           id="exampleRadios4"--}}
-{{--                           value="option4">--}}
-{{--                    <label class="form-check-label" for="exampleRadios4">--}}
-{{--                        Warning ++--}}
-{{--                    </label>--}}
-{{--                </div>--}}
-                <label><input type="radio" name="radio" value="1"> Radio Button 1</label>
-                <label><input type="radio" name="radio" value="2"> Radio Button 2</label>
-                <label><input type="radio" name="radio" value="3"> Radio Button 3</label>
-                <label><input type="radio" name="radio" value="4"> Radio Button 4</label>
+                                    <button id="check_url_btn" class="btn btn-primary" type="button"
+                                            style="background-color: #2563eb">CHECK
+                                    </button>
+                                    <p id="url_label"></p>
+                                </div>
+                                <input id="id_user" type="hidden" value="{{ Auth::user()->id }}">
+                                <div>
+                                    <label>Выберите название</label><br>
+                                    <select id="project">
+                                        @foreach($projects as $project)
+                                            <option>{{$project->title}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label id="time1">Введите время</label><br>
+                                    <input id="time" type="number" min="1" max="40" value="">
+                                    <p id="time_label"></p>
+                                </div>
+                                <label><input type="radio" name="radio" value="1" checked> Radio Button 1</label>
+                                <label><input type="radio" name="radio" value="2"> Radio Button 2</label>
+                                <label><input type="radio" name="radio" value="3"> Radio Button 3</label>
+                                <label><input type="radio" name="radio" value="4"> Radio Button 4</label>
 
 
-                <input id="save_form_btn" name="submit" type="submit" value="SAVE">
-            </div>
+                                <input id="save_form_btn" name="submit" type="submit" value="SAVE">
+                            </div>
 
-            {{-- таблица вывода url --}}
-            <div class="col-7">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Url</th>
-                        <th scope="col">Time</th>
-                        <th scope="col">Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($urls as $data)
-                    <tr>
-                        <th scope="row">{{$data->id}}</th>
-                        <td>{{$data->url}}</td>
-                        <td>{{$data->time}}</td>
-                        <td>{{$data->created_at}}</td>
-                    </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+                            {{-- таблица вывода url --}}
+                            <div class="col-7">
+                                <table id="mytable" class="table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Url</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Time</th>
+                                        <th scope="col">Date</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($urls as $data)
+                                        @if(Auth::user()->id == $data->id_user)
+                                            <tr>
+                                                <th scope="row">{{$data->id}}</th>
+                                                <td>{{$data->url}}</td>
+                                                <td>{{$data->name}}</td>
+                                                <td>{{$data->time}}</td>
+                                                <td>{{$data->created_at}}</td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    {{--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>--}}
-    {{--    <script>--}}
-
-    {{--        $('#urlForm').on('submit', function (event) {--}}
-    {{--            alert('ol')--}}
-    {{--            event.preventDefault();--}}
-    {{--            console.log('ok');--}}
-    {{--            let url = $('#url').val();--}}
-
-    {{--            $.ajax({--}}
-    {{--                url: "test",--}}
-    {{--                type: "GET",--}}
-    {{--                data: {--}}
-    {{--                    "_token": "{{ csrf_token() }}",--}}
-    {{--                    url: url--}}
-    {{--                },--}}
-    {{--                success: function (response) {--}}
-    {{--                    console.log(response);--}}
-    {{--                },--}}
-    {{--            });--}}
-    {{--        });--}}
-    {{--    </script>--}}
-    </div>
-
+</x-app-layout>

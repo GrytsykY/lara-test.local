@@ -9,17 +9,17 @@ class Url extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
-
+    public $timestamps = true;
 
     protected $fillable = [
         'url',
+        'name',
         'time',
         'count_inquiry',
         'count_query_url',
         'choice',
-        'id_user'
+        'id_user',
+//        'created_at'
     ];
 
     public function urls()

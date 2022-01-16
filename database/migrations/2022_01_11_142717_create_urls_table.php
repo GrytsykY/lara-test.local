@@ -16,13 +16,15 @@ class CreateUrlsTable extends Migration
         Schema::create('urls', function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->string('url', 2048);
+            $table->string('name', 30);
             $table->unsignedTinyInteger('time');
             $table->tinyInteger('count_inquiry');
             $table->tinyInteger('count_query_url');
             $table->boolean('choice');
             $table->unsignedSmallInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users');
-            $table->dateTime('created_at')->useCurrent();
+//            $table->dateTime('created_at')->useCurrent();
+            $table->timestamps();
         });
     }
 
