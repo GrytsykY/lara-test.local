@@ -6,6 +6,7 @@ $(document).ready(function () {
         let url_check = $('#url_check').val();
 
         $(".error").remove();
+        $('.status').remove();
         if (url_check.length < 1) {
             $('#url_label').after('<span class="error">Введите url</span>');
             error = true;
@@ -20,7 +21,6 @@ $(document).ready(function () {
         if (error) return;
 
         $.ajax({
-            // url: 'https://cors-anywhere.herokuapp.com/http://grytsyk.pl.ua/magazin/index.php',
             url: 'url/ajax-check-url',
             type: "POST",
             headers: {
@@ -30,6 +30,7 @@ $(document).ready(function () {
                 url_check: url_check
             },
             success: function (response) {
+                $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
                 console.log(response);
             },
             error: function (data) {
@@ -38,6 +39,7 @@ $(document).ready(function () {
 
         });
         if (!error) $('#url_check').val('');
+
     });
 
     $('#save_form_btn').on('click', function (event) {
@@ -72,8 +74,13 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (time < 0) {
+        if (time < 0 ) {
             $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
+            error = true;
+        }
+
+        if (time > 40 ) {
+            $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
             error = true;
         }
 

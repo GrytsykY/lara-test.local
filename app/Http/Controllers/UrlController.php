@@ -127,9 +127,6 @@ class UrlController extends Controller
 
         curl_close($ch);
 
-//        $response = json_decode($response, true);
-
-//        return redirect('url.index')->response()->json(['response' => $response, 'status' => $status]);
         return response()->json(['status' => $status]);
     }
 }
