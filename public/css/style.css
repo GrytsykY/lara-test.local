@@ -19,6 +19,10 @@ label {
 label.error {
     display: inline;
 }
+
+.control {
+    border-radius: 5px;
+}
 /*#url{*/
 /*    background-color: #fc103f;*/
 /*}*/

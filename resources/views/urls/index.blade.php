@@ -23,19 +23,20 @@
                         @endif
                         <div class="row">
                             <div class="col-5">
+
                                 <div>
                                     <label id="url_check1">Введите url</label><br>
-                                    <input id="url_check" class="" name="url" type="text" value="">
+                                    <input id="url_check" class="control" name="url" type="text" value="">
 
                                     <button id="check_url_btn" class="btn btn-primary" type="button"
                                             style="background-color: #2563eb">CHECK
                                     </button>
                                     <p id="url_label"></p>
                                 </div>
-                                <input id="id_user" type="hidden" value="{{ Auth::user()->id }}">
+                                <input id="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
                                 <div>
                                     <label>Выберите название</label><br>
-                                    <select id="project">
+                                    <select id="project" class="control">
                                         @foreach($projects as $project)
                                             <option>{{$project->title}}</option>
                                         @endforeach
@@ -43,16 +44,17 @@
                                 </div>
                                 <div>
                                     <label id="time1">Введите время</label><br>
-                                    <input id="time" type="number" min="1" max="40" value="">
+                                    <input id="time" class="control" type="number" min="1" max="40" value="">
                                     <p id="time_label"></p>
                                 </div>
+
                                 <label><input type="radio" name="radio" value="1" checked> Radio Button 1</label>
                                 <label><input type="radio" name="radio" value="2"> Radio Button 2</label>
                                 <label><input type="radio" name="radio" value="3"> Radio Button 3</label>
                                 <label><input type="radio" name="radio" value="4"> Radio Button 4</label>
 
 
-                                <input id="save_form_btn" name="submit" type="submit" value="SAVE">
+                                <input id="save_form_btn" class="btn btn-primary" value="SAVE">
                             </div>
 
                             {{-- таблица вывода url --}}
@@ -69,7 +71,15 @@
                                     </thead>
                                     <tbody>
                                     @foreach($urls as $data)
-                                        @if(Auth::user()->id == $data->id_user)
+                                        @if(Auth::user()->id == $data->id_user && Auth::user()->role == 0)
+                                            <tr>
+                                                <th scope="row">{{$data->id}}</th>
+                                                <td>{{$data->url}}</td>
+                                                <td>{{$data->name}}</td>
+                                                <td>{{$data->time}}</td>
+                                                <td>{{$data->created_at}}</td>
+                                            </tr>
+                                        @elseif(Auth::user()->role == 1)
                                             <tr>
                                                 <th scope="row">{{$data->id}}</th>
                                                 <td>{{$data->url}}</td>

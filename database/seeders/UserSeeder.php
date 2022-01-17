@@ -25,9 +25,19 @@ class UserSeeder extends Seeder
                 'email'=> 'email_'.$i.'@cc.com',
                 'login'=> 'test_'.$i,
                 'password'=> Hash::make('1234567_'.$i),
+                'role' => 0,
                 'id_project'=>$projects[rand(0,count($projects)-1)]['id']
                 ]);
             $user->save();
         }
+        $user = new User([
+            'name'=> 'admin',
+            'email'=> 'email_admin@cc.com',
+            'login'=> 'admin',
+            'password'=> Hash::make('12345678'),
+            'role' => 1,
+            'id_project'=>$projects[rand(0,count($projects)-1)]['id']
+        ]);
+        $user->save();
     }
 }

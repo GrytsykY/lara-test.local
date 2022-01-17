@@ -1,28 +1,43 @@
 $(document).ready(function () {
-    console.log($('#mytable'))
+
     $('#check_url_btn').on('click', function () {
+        let error = false;
 
-        let url = $('#url').val();
+        let url_check = $('#url_check').val();
 
-        console.log(url);
+        $(".error").remove();
+        if (url_check.length < 1) {
+            $('#url_label').after('<span class="error">Введите url</span>');
+            error = true;
+        }
+
+        var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+        if (res == null && !error) {
+            $('#url_label').after('<span class="error">Неверный url адрес</span>');
+            error = true;
+        }
+
+        if (error) return;
 
         $.ajax({
-            url: 'https://cors-anywhere.herokuapp.com/http://grytsyk.pl.ua/magazin/index.php',
-            type: "GET",
-            // headers: {
-            //     'X-Requested-With': 'XMLHttpRequest',
-            //     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            //     'Access-Control-Allow-Origin' : '*',
-            //     'Access-Control-Allow-Methods' : '*',
-            //     'Access-Control-Allow-Headers' : '*',
-            // },
-            // data: {
-            //     url: url
-            // },
+            // url: 'https://cors-anywhere.herokuapp.com/http://grytsyk.pl.ua/magazin/index.php',
+            url: 'url/ajax-check-url',
+            type: "POST",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+            data:{
+                url_check: url_check
+            },
             success: function (response) {
                 console.log(response);
             },
+            error: function (data) {
+                console.log(data);
+            }
+
         });
+        if (!error) $('#url_check').val('');
     });
 
     $('#save_form_btn').on('click', function (event) {
@@ -33,10 +48,11 @@ $(document).ready(function () {
         let time = $('#time').val();
         let name = $('#project').val();
         let id_user = $('#id_user').val();
-        console.log(name)
         let choice = $('input[name="radio"]:checked').val();
+
         console.log(url_check)
         console.log(time)
+        console.log(name)
         $(".error").remove();
 
         if (url_check.length < 1) {
@@ -91,6 +107,10 @@ $(document).ready(function () {
                     </tr>`)
             },
         });
+
+        $("input[type='radio']:checked").val("");
+        $("#time").val("");
+        $("#url_check").val("");
     });
 
 

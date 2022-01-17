@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('login',45)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password',);
+            $table->tinyInteger('role',);
             $table->unsignedSmallInteger('id_project');
             $table->foreign('id_project')->references('id')->on('projects');
             $table->timestamps();

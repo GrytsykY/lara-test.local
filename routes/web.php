@@ -20,8 +20,9 @@ Route::get('/', function () {
 });
 
 Route::get('/test', [TestController::class, 'index']);
+
 Route::resource('/url', UrlController::class)->middleware(['auth']);
-//Route::get('/url', [UrlController::class, 'ajaxUrl'])->middleware(['auth']);
+Route::post('/url/ajax-check-url', [UrlController::class, 'ajaxCheckUrl'])->name('ajaxCheckUrl');
 
 
 Route::get('/dashboard', function () {
