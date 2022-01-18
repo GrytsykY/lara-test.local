@@ -10,20 +10,20 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+
+                        <div id="error_mes" class="alert alert-danger text-center">
+
                         </div>
-                    @endif
+
+                    {{--                    <div class="search">--}}
+                    {{--                        <input id="textInput" class="search" type="text" value=""/>--}}
+                    {{--                        <input id="clearButton" class="submit" value="Clear" />--}}
+                    {{--                    </div>--}}
                     <div class="row">
                         <div class="col-5">
                             <div>
                                 <label>Выберите название</label><br>
-                                <select id="project" class="control">
+                                <label for="project"></label><select id="project" class="control">
                                     @foreach($projects as $project)
                                         <option>{{$project->title}}</option>
                                     @endforeach
@@ -31,7 +31,8 @@
                             </div>
                             <div>
                                 <label id="url_check1">Введите url</label><br>
-                                <input id="url_check" class="control" name="url" type="text" value="">
+                                <label for="url_check"></label><input id="url_check" class="control" name="url"
+                                                                      type="text" value="">
 
                                 <button id="check_url_btn" class="btn btn-primary" type="button"
                                         style="background-color: #2563eb">CHECK
@@ -42,17 +43,35 @@
                             <input id="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
 
                             <div>
+                                <label id="code">Введите код ответа</label><br>
+                                <input id="status_code" class="control" type="number" min="200" max="510" required>
+                                <p id="code_label"></p>
+                            </div>
+
+                            <div>
                                 <label id="time1">Введите время</label><br>
-                                <input id="time" class="control" type="number" min="1" max="40" value="">
+                                <input id="time" class="control" type="number" min="1" max="40" required>
                                 <p id="time_label"></p>
                             </div>
+
                             <div>
-                                <label><input type="radio" name="radio" value="1" checked> Radio Button 1</label>
-                                <label><input type="radio" name="radio" value="2"> Radio Button 2</label>
+                                <label id="count">Введите кол-запросов</label><br>
+                                <input id="count_link" class="control" type="number" min="1" max="40" required>
+                                <p id="count_label"></p>
                             </div>
+
+                            <table>
+                                <tr>
+                                    <th><input type="radio" name="radio" value="1" checked> Не важно</th>
+                                    <th><input type="radio" name="radio" value="2"> Важно</th>
+                                </tr>
+                                <tr>
+                                    <th><input type="radio" name="radio" value="3"> Важно +</th>
+                                    <th><input type="radio" name="radio" value="4"> Очень важно</th>
+                                </tr>
+                            </table>
                             <div>
-                                <label><input type="radio" name="radio" value="3"> Radio Button 3</label>
-                                <label><input type="radio" name="radio" value="4"> Radio Button 4</label>
+
                             </div>
 
                             <input id="save_form_btn" class="btn btn-primary" value="SAVE">
@@ -77,7 +96,7 @@
                                             <th scope="row">{{$data->id}}</th>
                                             <td>{{$data->url}}</td>
                                             <td>{{$data->name}}</td>
-                                            <td>{{$data->time}}</td>
+                                            <td>{{$data->time_out}}</td>
                                             <td>{{$data->created_at}}</td>
                                         </tr>
                                     @elseif(Auth::user()->role == 1)

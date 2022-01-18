@@ -17,10 +17,13 @@ class CreateUrlsTable extends Migration
             $table->smallIncrements('id');
             $table->string('url', 2048);
             $table->string('name', 30);
-            $table->unsignedTinyInteger('time');
-            $table->tinyInteger('count_inquiry');
-            $table->tinyInteger('count_query_url');
-            $table->boolean('choice');
+            $table->unsignedTinyInteger('time_out');
+            $table->tinyInteger('count_link');
+            $table->tinyInteger('count_query_url')->default(0);
+            $table->tinyInteger('choice');
+            $table->integer('status_code');
+            $table->boolean('flag_error_code')->default(false);
+            $table->boolean('flag_success_code')->default(false);
             $table->unsignedSmallInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users');
 //            $table->dateTime('created_at')->useCurrent();

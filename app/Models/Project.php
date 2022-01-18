@@ -18,6 +18,7 @@ class Project extends Model
 
     protected $fillable = [
         'title',
+        'id_alert',
         'created_at'
     ];
 }

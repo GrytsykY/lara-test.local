@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTextsTable extends Migration
+class CreateAlertsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateTextsTable extends Migration
      */
     public function up()
     {
-        Schema::create('texts', function (Blueprint $table) {
+        Schema::create('alerts', function (Blueprint $table) {
             $table->smallIncrements('id');
-            $table->string('title');
-            $table->string('description');
-            $table->dateTime('created_at')->useCurrent();
+            $table->string('name',60);
+            $table->string('description',60);
+            $table->timestamps();
         });
     }
 
@@ -28,6 +28,6 @@ class CreateTextsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('texts');
+        Schema::dropIfExists('alerts');
     }
 }

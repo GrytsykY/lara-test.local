@@ -36,29 +36,33 @@ class UrlController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
         $url = new Url;
-//        file_put_contents(__DIR__."/STORE.txt", print_r(['data' => date("H:i:s"),'url' => $request], FILE_APPEND));
-        $validate = $this->validate($request,[
-           'url' => 'required|max:2048',
-           'time' => 'required',
-           'choice' => 'required',
-       ]);
+
+        $validator = Validator::make($request->all(),[
+            'url' => 'required|max:2048',
+            'time_out' => 'required|integer|max:40',
+            'count_link' => 'required|integer',
+            'status_code' => 'required|integer|min:200|max:500',
+        ]);
+        if (!$validator->passes()) {
+            return response()->json(['error'=>$validator->errors()->all()]);
+        }
 
         $url->url = $request->url;
         $url->name = $request->name;
-        $url->time = $request->time;
-        $url->count_inquiry = 45;//$request->project;
-        $url->count_query_url = 23;//$request->count_query_url;
+        $url->time_out = $request->time_out;
+        $url->count_link = $request->count_link;
+        $url->status_code = $request->status_code;
         $url->choice = $request->choice;
         $url->id_user = $request->id_user;
 
         $url->save();
 
-        return response()->json(['data' => $url, 'validate'=>$validate]);
+        return response()->json(['data' => $url]);
 //        return redirect()->route('url.index')->with('success','Post created successfully.');
     }
 

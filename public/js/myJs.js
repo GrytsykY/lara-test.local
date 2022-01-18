@@ -1,5 +1,9 @@
 $(document).ready(function () {
 
+    // document.getElementById("clearButton").onclick = function(e) {
+    //     document.getElementById("textInput").value = "";
+    // }
+
     $('#check_url_btn').on('click', function () {
         let error = false;
 
@@ -38,24 +42,28 @@ $(document).ready(function () {
             }
 
         });
-        if (!error) $('#url_check').val('');
+        // if (!error) $('#url_check').val('');
 
     });
 
     $('#save_form_btn').on('click', function (event) {
 
-        let error = false;
+        var error = false;
 
         let url_check = $('#url_check').val();
         let time = $('#time').val();
         let name = $('#project').val();
         let id_user = $('#id_user').val();
+        let status_code = $('#status_code').val();
+        let count_link = $('#count_link').val();
         let choice = $('input[name="radio"]:checked').val();
 
         console.log(url_check)
         console.log(time)
         console.log(name)
         $(".error").remove();
+        // $(".alert alert-danger").remove();
+
 
         if (url_check.length < 1) {
             $('#url_label').after('<span class="error">Введите url</span>');
@@ -84,6 +92,22 @@ $(document).ready(function () {
             error = true;
         }
 
+        if (status_code.length < 1) {
+            $('#code_label').after('<span class="error">Введите код</span>');
+            error = true;
+        }
+
+        // if (status_code < 200 || status_code > 500) {
+        //     $('#code_label').after('<span class="error">Не верный код</span>');
+        //     error = true;
+        // }
+
+        if (count_link.length < 1) {
+            $('#count_label').after('<span class="error">Введите колличество запросов</span>');
+            error = true;
+        }
+
+
         if (error) return;
 
         $.ajax({
@@ -94,30 +118,54 @@ $(document).ready(function () {
             },
             data: {
                 url: url_check,
-                time: time,
+                time_out: time,
                 name: name,
                 choice: choice,
                 id_user: id_user,
+                status_code: status_code,
+                count_link: count_link,
             },
 
             success: function (response) {
                 console.log(response);
                 const data = response.data
 
-                $('#mytable').append(`
+
+                if (response.error) {
+                    for (let i = 0; i < response.error.length; i++) {
+                        let ul = document.createElement('ul');
+                        let li = document.createElement('li');
+                        li.innerHTML = response.error[i];
+                        ul.appendChild(li);
+                        document.getElementById('error_mes').appendChild(ul);
+                        // document.getElementById('error_mes').classList.add("alert alert-danger");
+                    }
+                    error=true;
+                }
+
+                if (data) {
+                    $('#mytable').append(`
                         <tr>
                         <th scope="row">${data.id}</th>
                         <td>${data.url}</td>
                         <td>${data.name}</td>
-                        <td>${data.time}</td>
+                        <td>${data.time_out}</td>
                         <td>${data.created_at}</td>
                     </tr>`)
-            },
-        });
+                }
+                if (!error) {
+                    $("input[type='radio']:checked").val("");
+                    $("#time").val("");
+                    $("#url_check").val("");
+                    $("#status_code").val("");
+                    $("#count_link").val("");
+                }
 
-        $("input[type='radio']:checked").val("");
-        $("#time").val("");
-        $("#url_check").val("");
+            }
+        });
+        document.getElementById('error_mes').innerHTML = "";
+        console.log('ERROR '+ error)
+
     });
 
 
