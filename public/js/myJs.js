@@ -35,6 +35,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
+                $('#status_code').after(`${response.status}`);
                 console.log(response);
             },
             error: function (data) {
@@ -62,6 +63,7 @@ $(document).ready(function () {
         console.log(id_project)
         console.log(time)
         console.log(name)
+        console.log(status_code)
         $(".error").remove();
         // $(".alert alert-danger").remove();
 
@@ -149,12 +151,15 @@ $(document).ready(function () {
                 }
 
                 if (data) {
+                    console.log(data)
                     $('#mytable').append(`
                         <tr>
                         <th scope="row">${data.id}</th>
-                        <td>${data.url}</td>
                         <td>${data.name}</td>
+                        <td>${data.last_ping}</td>
                         <td>${data.time_out}</td>
+                        <td>${data.status_code}</td>
+                        <td>${data.max_count_ping}</td>
                         <td>${data.created_at}</td>
                     </tr>`)
                 }

@@ -16,38 +16,15 @@ class UrlController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
     public function index()
     {
-        $urls = DB::table('urls')
-            ->select('last_ping', 'time_out')
-            ->get();
-
-//        dd($urls);
-
-        foreach ($urls as $url) {
-            $last_ping1 = strtotime(date($url->last_ping));
-            $last_ping = $last_ping1 + $url->time_out;
-
-
-            if ($last_ping == strtotime(date('Y-m-d H:i:s'))) {
-
-            }
-
-        }
-        print_r('last_ping  ');
-        print_r($last_ping1);
-        print_r(' + time_out ');
-        print_r($last_ping);
-        print_r(' now date ');
-        print_r(strtotime(date('Y-m-d H:i:s')));
-//        dd($urls);
 
         $urls = Url::all();
         $projects = Project::all();
         $alerts = Alert::all();
-//        dd($projects);
+
         return view('urls.index', compact('urls', 'projects', 'alerts'));
     }
 
@@ -69,8 +46,6 @@ class UrlController extends Controller
      */
     public function store(Request $request)
     {
-
-
         $validator = Validator::make($request->all(), [
             'url' => 'required|max:2048',
             'name' => 'required|string|min:3',
@@ -203,8 +178,15 @@ class UrlController extends Controller
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
             ->get();
 
-        DB::table('urls')->where();
+        foreach ($urls as $url) {
+            $update = DB::table('urls')
+                ->where('id', '=',$url->id)
+                ->update([
+                    'last_ping' => $current
+                ]);
 
+        }
+//        dump($update);
         dump($urls);
 
 //        $update =  $this->update();

@@ -47,7 +47,7 @@
 
                             <div>
                                 <label id="code">Введите код ответа</label><br>
-                                <input id="status_code" class="control" type="number" min="200" max="510" required>
+                                <input id="status_code" class="status_code control" type="number" min="200" max="510" required>
                                 <p id="code_label"></p>
                             </div>
 
@@ -91,7 +91,7 @@
                                     <th scope="col">Last ping</th>
                                     <th scope="col">Time</th>
                                     <th scope="col">Code</th>
-                                    <th scope="col">Alert</th>
+                                    <th scope="col">Max ping</th>
                                     <th scope="col">Date</th>
                                 </tr>
                                 </thead>
@@ -104,7 +104,7 @@
                                             <td>{{$data->last_ping}}</td>
                                             <td>{{$data->time_out}}</td>
                                             <td>{{$data->status_code}}</td>
-                                            <td><a href=" {{route('alert.show',$data->id_alert)}} ">{{$data->id_alert}}</a></td>
+                                            <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                         </tr>
                                     @elseif(Auth::user()->role == 1)
