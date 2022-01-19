@@ -87,10 +87,10 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (time > 40 ) {
-            $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
-            error = true;
-        }
+        // if (time > 40 ) {
+        //     $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
+        //     error = true;
+        // }
 
         if (status_code.length < 1) {
             $('#code_label').after('<span class="error">Введите код</span>');
@@ -132,6 +132,7 @@ $(document).ready(function () {
 
 
                 if (response.error) {
+
                     for (let i = 0; i < response.error.length; i++) {
                         let ul = document.createElement('ul');
                         let li = document.createElement('li');
@@ -139,6 +140,8 @@ $(document).ready(function () {
                         ul.appendChild(li);
                         document.getElementById('error_mes').appendChild(ul);
                         // document.getElementById('error_mes').classList.add("alert alert-danger");
+                        document.querySelector('.error_mes div').classList.add('alert alert-danger');
+
                     }
                     error=true;
                 }
@@ -154,7 +157,6 @@ $(document).ready(function () {
                     </tr>`)
                 }
                 if (!error) {
-                    $("input[type='radio']:checked").val("");
                     $("#time").val("");
                     $("#url_check").val("");
                     $("#status_code").val("");
