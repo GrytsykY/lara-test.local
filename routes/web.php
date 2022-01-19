@@ -22,7 +22,9 @@ Route::get('/', function () {
 Route::get('/test', [TestController::class, 'index']);
 
 Route::resource('/url', UrlController::class)->middleware(['auth']);
+Route::resource('/alert', \App\Http\Controllers\AlertController::class);
 Route::post('/url/ajax-check-url', [UrlController::class, 'ajaxCheckUrl'])->name('ajaxCheckUrl');
+Route::get('url-ping/ping1', [UrlController::class, 'ping1'])->name('ping1');
 
 
 Route::get('/dashboard', function () {

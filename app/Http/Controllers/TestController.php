@@ -31,4 +31,11 @@ class TestController extends Controller
 //        return view('urls.index');
 //        return response()->json(['urls' => $url]);
     }
+
+
+    public function tr(){
+        dd("sdf");
+}
+
+
 }

@@ -14,12 +14,17 @@ class Url extends Model
     protected $fillable = [
         'url',
         'name',
-        'time',
-        'count_inquiry',
-        'count_query_url',
-        'choice',
+        'time_out',
+        'max_count_ping',
+        'ping_counter',
+        'status_code',
+        'last_ping',
+        'is_failed',
+        'is_sent_alert',
+        'id_alert',
         'id_user',
-//        'created_at'
+        'id_project',
+
     ];
 
     public function urls()

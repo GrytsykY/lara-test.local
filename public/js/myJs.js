@@ -52,13 +52,14 @@ $(document).ready(function () {
 
         let url_check = $('#url_check').val();
         let time = $('#time').val();
-        let name = $('#project').val();
+        let name = $('#name').val();
         let id_user = $('#id_user').val();
         let status_code = $('#status_code').val();
         let count_link = $('#count_link').val();
+        let id_project = $('#project option:selected').attr('id');
         let choice = $('input[name="radio"]:checked').val();
 
-        console.log(url_check)
+        console.log(id_project)
         console.log(time)
         console.log(name)
         $(".error").remove();
@@ -118,12 +119,13 @@ $(document).ready(function () {
             },
             data: {
                 url: url_check,
-                time_out: time,
                 name: name,
-                choice: choice,
-                id_user: id_user,
+                time_out: time,
+                max_count_ping: count_link,
                 status_code: status_code,
-                count_link: count_link,
+                id_alert: choice,
+                id_user: id_user,
+                id_project: id_project,
             },
 
             success: function (response) {
@@ -140,7 +142,7 @@ $(document).ready(function () {
                         ul.appendChild(li);
                         document.getElementById('error_mes').appendChild(ul);
                         // document.getElementById('error_mes').classList.add("alert alert-danger");
-                        document.querySelector('.error_mes div').classList.add('alert alert-danger');
+                        // document.querySelector('.error_mes div').classList.add('alert alert-danger');
 
                     }
                     error=true;

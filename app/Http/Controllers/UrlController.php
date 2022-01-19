@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alert;
 use App\Models\Project;
 use App\Models\Url;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class UrlController extends Controller
@@ -16,10 +20,35 @@ class UrlController extends Controller
      */
     public function index()
     {
+        $urls = DB::table('urls')
+            ->select('last_ping', 'time_out')
+            ->get();
+
+//        dd($urls);
+
+        foreach ($urls as $url) {
+            $last_ping1 = strtotime(date($url->last_ping));
+            $last_ping = $last_ping1 + $url->time_out;
+
+
+            if ($last_ping == strtotime(date('Y-m-d H:i:s'))) {
+
+            }
+
+        }
+        print_r('last_ping  ');
+        print_r($last_ping1);
+        print_r(' + time_out ');
+        print_r($last_ping);
+        print_r(' now date ');
+        print_r(strtotime(date('Y-m-d H:i:s')));
+//        dd($urls);
+
         $urls = Url::all();
         $projects = Project::all();
+        $alerts = Alert::all();
 //        dd($projects);
-        return view('urls.index', compact('urls', 'projects'));
+        return view('urls.index', compact('urls', 'projects', 'alerts'));
     }
 
     /**
@@ -40,28 +69,23 @@ class UrlController extends Controller
      */
     public function store(Request $request)
     {
-        $url = new Url;
 
-        $validator = Validator::make($request->all(),[
+
+        $validator = Validator::make($request->all(), [
             'url' => 'required|max:2048',
-            'time_out' => 'required|integer|max:40',
-            'count_link' => 'required|integer',
+            'name' => 'required|string|min:3',
+            'time_out' => 'required|integer|max:60',
+            'max_count_ping' => 'required|integer',
             'status_code' => 'required|integer|min:200|max:500',
+            'id_alert' => 'required|integer|exists:alerts,id',
+            'id_user' => 'required|integer|exists:users,id',
+            'id_project' => 'required|integer|exists:projects,id',
         ]);
         if (!$validator->passes()) {
-            return response()->json(['error'=>$validator->errors()->all()]);
+            return response()->json(['error' => $validator->errors()->all()]);
         }
-
-        $url->url = $request->url;
-        $url->name = $request->name;
-        $url->time_out = $request->time_out;
-        $url->count_link = $request->count_link;
-        $url->status_code = $request->status_code;
-        $url->choice = $request->choice;
-        $url->id_user = $request->id_user;
-
+        $url = new Url($validator->validated());
         $url->save();
-
         return response()->json(['data' => $url]);
 //        return redirect()->route('url.index')->with('success','Post created successfully.');
     }
@@ -74,6 +98,7 @@ class UrlController extends Controller
      */
     public function show(Url $urls)
     {
+        dd("r34545");
 //        return view('urls.show',compact('urls'));
 //        return redirect('index', $urls);
     }
@@ -112,13 +137,8 @@ class UrlController extends Controller
         //
     }
 
-    public function ajaxCheckUrl(Request $request)
+    public function curl($url)
     {
-
-        $url = $request->url_check;
-
-//        file_put_contents(__DIR__."/AJAX.txt", print_r(['data' => date("H:i:s"),'url' => $request], FILE_APPEND));
-//        $url = 'https://www.olx.ua/';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -128,9 +148,67 @@ class UrlController extends Controller
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
         curl_close($ch);
 
-        return response()->json(['status' => $status]);
+
+        return $status;
+    }
+
+    public function ajaxCheckUrl(Request $request)
+    {
+        $urls = Url::all();
+        $users = User::all();
+
+        $url = $request->url_check;
+
+        $status = $this->curl($url);
+
+
+        $message = [];
+        foreach ($urls as $value) {
+            foreach ($users as $user) {
+                if ($user->id == $value->id_user) {
+                    if ($status == $value->status_code) {
+
+                        $message[] = [
+                            'success ' => 'Success',
+                            'user_name' => $user->name,
+                            'id_user' => $user->id,
+                            'url' => $value->url,
+                            'code' => $value->status_code,
+                        ];
+                    } else {
+                        $message[] = [
+                            'success ' => 'Success',
+                            'user_name' => $user->name,
+                            'id_user' => $user->id,
+                            'url' => $value->url,
+                            'code' => $value->status_code,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return response()->json(['status' => $status, 'message' => $message]);
+    }
+
+    public function ping1()
+    {
+
+        $current = Carbon::now();
+        $current->format('Y-m-d H:i:s');
+
+        $urls = DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->get();
+
+        DB::table('urls')->where();
+
+        dump($urls);
+
+//        $update =  $this->update();
+
+
     }
 }

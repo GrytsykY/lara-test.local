@@ -14,7 +14,7 @@
                         <div id="error_mes" class="error_mes">
 
                         </div>
-
+{{--                    <a href="{{route('ping1')}}">URL</a>--}}
                     {{--                    <div class="search">--}}
                     {{--                        <input id="textInput" class="search" type="text" value=""/>--}}
                     {{--                        <input id="clearButton" class="submit" value="Clear" />--}}
@@ -25,22 +25,25 @@
                                 <label>Выберите название</label><br>
                                 <label for="project"></label><select id="project" class="control">
                                     @foreach($projects as $project)
-                                        <option>{{$project->title}}</option>
+                                        <option id="{{$project->id}}">{{$project->title}}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div>
+                                <input id="name" type="text" value="">
                             </div>
                             <div>
                                 <label id="url_check1">Введите url</label><br>
                                 <label for="url_check"></label><input id="url_check" class="control" name="url"
                                                                       type="text" value="">
-
+                                <input id="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
                                 <button id="check_url_btn" class="btn btn-primary" type="button"
                                         style="background-color: #2563eb">CHECK
                                 </button>
                                 <p id="url_label"></p>
                                 <p id="url_status"></p>
                             </div>
-                            <input id="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
+
 
                             <div>
                                 <label id="code">Введите код ответа</label><br>
@@ -60,15 +63,16 @@
                                 <p id="count_label"></p>
                             </div>
 
+
                             <table>
+
+                                @foreach($alerts as $alert)
+
                                 <tr>
-                                    <th><input type="radio" name="radio" value="1" checked> Не важно</th>
-                                    <th><input type="radio" name="radio" value="2"> Важно</th>
+                                    <th><input  type="radio" name="radio" value="{{$alert->id}}" > {{$alert->name}}</th>
+
                                 </tr>
-                                <tr>
-                                    <th><input type="radio" name="radio" value="3"> Важно +</th>
-                                    <th><input type="radio" name="radio" value="4"> Очень важно</th>
-                                </tr>
+                                @endforeach
                             </table>
                             <div>
 
@@ -83,20 +87,24 @@
                                 <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Url</th>
                                     <th scope="col">Name</th>
+                                    <th scope="col">Last ping</th>
                                     <th scope="col">Time</th>
+                                    <th scope="col">Code</th>
+                                    <th scope="col">Alert</th>
                                     <th scope="col">Date</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($urls as $data)
+                                @foreach($urls as $key=> $data)
                                     @if(Auth::user()->id == $data->id_user && Auth::user()->role == 0)
                                         <tr>
-                                            <th scope="row">{{$data->id}}</th>
-                                            <td>{{$data->url}}</td>
+                                            <th scope="row">{{$key+1}}</th>
                                             <td>{{$data->name}}</td>
+                                            <td>{{$data->last_ping}}</td>
                                             <td>{{$data->time_out}}</td>
+                                            <td>{{$data->status_code}}</td>
+                                            <td><a href=" {{route('alert.show',$data->id_alert)}} ">{{$data->id_alert}}</a></td>
                                             <td>{{$data->created_at}}</td>
                                         </tr>
                                     @elseif(Auth::user()->role == 1)
@@ -104,7 +112,7 @@
                                             <th scope="row">{{$data->id}}</th>
                                             <td>{{$data->url}}</td>
                                             <td>{{$data->name}}</td>
-                                            <td>{{$data->time}}</td>
+                                            <td>{{$data->status_code}}</td>
                                             <td>{{$data->created_at}}</td>
                                         </tr>
                                     @endif

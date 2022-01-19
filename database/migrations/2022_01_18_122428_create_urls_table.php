@@ -18,15 +18,18 @@ class CreateUrlsTable extends Migration
             $table->string('url', 2048);
             $table->string('name', 30);
             $table->unsignedTinyInteger('time_out');
-            $table->tinyInteger('count_link');
-            $table->tinyInteger('count_query_url')->default(0);
-            $table->tinyInteger('choice');
+            $table->smallInteger('max_count_ping');
+            $table->tinyInteger('ping_counter')->default(0);
             $table->integer('status_code');
-            $table->boolean('flag_error_code')->default(false);
-            $table->boolean('flag_success_code')->default(false);
+            $table->dateTime('last_ping')->useCurrent();
+            $table->boolean('is_failed')->default(false);
+            $table->boolean('is_sent_alert')->default(false);
+            $table->unsignedSmallInteger('id_alert');
             $table->unsignedSmallInteger('id_user');
+            $table->unsignedSmallInteger('id_project');
             $table->foreign('id_user')->references('id')->on('users');
-//            $table->dateTime('created_at')->useCurrent();
+            $table->foreign('id_alert')->references('id')->on('alerts');
+            $table->foreign('id_project')->references('id')->on('projects');
             $table->timestamps();
         });
     }
