@@ -1,7 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight text-center">
-            {{ __('Панель пользователя') }}
+            @if (Auth::user()->role == 0)
+                {{ __('Панель пользователя') }}
+            @else
+                {{ __('Панель администратора') }}
+            @endif
         </h2>
     </x-slot>
 
@@ -108,7 +112,7 @@
                                     @if(Auth::user()->id_project == $data->id_project && Auth::user()->role == 0)
                                         <tr>
                                             <th scope="row">{{$key+1}}</th>
-                                            <td>{{$data->name}}</td>
+                                            <td><a href="{{route('url.show',$data->id_project)}}">{{$data->name}}</a></td>
                                             <td>{{$data->last_ping}}</td>
                                             <td>{{$data->time_out}}</td>
                                             <td>{{$data->status_code}}</td>
@@ -117,10 +121,12 @@
                                         </tr>
                                     @elseif(Auth::user()->role == 1)
                                         <tr>
-                                            <th scope="row">{{$data->id}}</th>
-                                            <td>{{$data->url}}</td>
-                                            <td>{{$data->name}}</td>
+                                            <th scope="row">{{$key+1}}</th>
+                                            <td><a href="{{route('url.show',$data->id)}}">{{$data->name}}</a></td>
+                                            <td>{{$data->last_ping}}</td>
+                                            <td>{{$data->time_out}}</td>
                                             <td>{{$data->status_code}}</td>
+                                            <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                         </tr>
                                     @endif

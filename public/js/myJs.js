@@ -155,7 +155,7 @@ $(document).ready(function () {
                     $('#mytable').append(`
                         <tr>
                         <th scope="row">${data.id}</th>
-                        <td>${data.name}</td>
+                        <td><a href="url/${data.id}">${data.name}</a></td>
                         <td>${data.last_ping}</td>
                         <td>${data.time_out}</td>
                         <td>${data.status_code}</td>
