@@ -112,7 +112,11 @@
                                     @if(Auth::user()->id_project == $data->id_project && Auth::user()->role == 0)
                                         <tr>
                                             <th scope="row">{{$key+1}}</th>
-                                            <td><a href="{{route('url.show',$data->id_project)}}">{{$data->name}}</a></td>
+                                            <td>
+                                                <a style="color: #2563eb" href="{{route('url.show',$data->id_project)}}">
+                                                    {{$data->name}}
+                                                </a>
+                                            </td>
                                             <td>{{$data->last_ping}}</td>
                                             <td>{{$data->time_out}}</td>
                                             <td>{{$data->status_code}}</td>
