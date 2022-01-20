@@ -71,15 +71,14 @@ class UrlController extends Controller
      * @param \App\Models\Url $urls
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
-    public function show(Url $urls,$id)
+    public function show(Url $urls, $id)
     {
 //        dd($id);
-        $urls = DB::table('urls')->where('id','=',$id)->get();
-        foreach ($urls as $url) {
-            $projects = DB::table('projects')->where('id', '=', $url->id_project)->get();
-        }
+        $urls = DB::table('urls')->where('id', '=', $id)->get();
 
-        return view('urls.show',compact('urls','projects'));
+        $projects = DB::table('projects')->where('id', '=', $urls[0]->id_project)->get();
+
+        return view('urls.show', compact('urls', 'projects'));
 //        return redirect('index', $urls);
     }
 
@@ -295,7 +294,7 @@ class UrlController extends Controller
                     $update = DB::table('urls')
                         ->where('id', '=', $url->id)
                         ->update([
-                            'ping_counter' => $url->ping_counter+1,
+                            'ping_counter' => $url->ping_counter + 1,
                             'is_failed' => 1,
                             'last_ping' => $current
                         ]);

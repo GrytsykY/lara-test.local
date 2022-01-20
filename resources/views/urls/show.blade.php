@@ -36,6 +36,7 @@
                                 <th scope="col">Last ping</th>
                                 <th scope="col">Time</th>
                                 <th scope="col">Code</th>
+                                <th scope="col">Col-ping</th>
                                 <th scope="col">Max ping</th>
                                 <th scope="col">Date</th>
                             </tr>
@@ -52,6 +53,7 @@
                                     <td>{{$data->last_ping}}</td>
                                     <td>{{$data->time_out}}</td>
                                     <td>{{$data->status_code}}</td>
+                                    <td>{{$data->ping_counter}}</td>
                                     <td>{{$data->max_count_ping}}</td>
                                     <td>{{$data->created_at}}</td>
                                 </tr>
