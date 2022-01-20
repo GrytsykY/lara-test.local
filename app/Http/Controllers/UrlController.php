@@ -168,7 +168,88 @@ class UrlController extends Controller
         return response()->json(['status' => $status, 'message' => $message]);
     }
 
+    public function updatePingNull($id, $current)
+    {
+        $update = DB::table('urls')
+            ->where('id', '=', $id)
+            ->update([
+                'is_failed' => 0,
+                'ping_counter' => 0,
+                'is_sent_alert' => 0,
+                'last_ping' => $current
+            ]);
+    }
+
     public function ping1()
+    {
+//        $status = $this->curl();
+
+        $current = Carbon::now();
+        $current->format('Y-m-d H:i:s');
+
+        $urls = DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', false)
+            ->get();
+
+//        $count_ping = DB::table('urls')->pluck('max_count_ping');
+        $count = 0;
+
+        foreach ($urls as $url) {
+            $count++;
+
+            $status = $this->curl($url->url);
+            dump($status);
+            if ($status == $url->status_code) {
+                // отправляем сообщение
+
+                $this->updatePingNull($url->id, $current);
+                break;
+            }
+
+            if ($url->max_count_ping == 1) {
+                $status = $this->curl($url->url);
+
+
+                if ($status == $url->status_code) {
+
+                    //отправляем сообщение true
+
+                    $this->updatePingNull($url->id, $current);
+                } else {
+                    //отправляем сообщение false
+
+                    $update = DB::table('urls')
+                        ->where('id', '=', $url->id)
+                        ->update([
+                            'is_failed' => 1,
+                            'is_sent_alert' => 1,
+                            'last_ping' => $current
+                        ]);
+                }
+            } else {
+
+                if ($url->max_count_ping == $url->ping_counter) {
+                    dump(' alert');
+                }
+
+                $update = DB::table('urls')
+                    ->where('id', '=', $url->id)
+                    ->update([
+                        'ping_counter' => $count,
+                        'is_failed' => 1,
+                        'last_ping' => $current
+                    ]);
+            }
+
+        }
+
+        dump($urls);
+
+
+    }
+
+    public function ping2()
     {
 
         $current = Carbon::now();
@@ -176,21 +257,89 @@ class UrlController extends Controller
 
         $urls = DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', true)
+            ->where('is_sent_alert', '=', false)
+            ->get();
+
+//        $count_ping = DB::table('urls')->pluck('max_count_ping');
+
+
+        foreach ($urls as $url) {
+
+            $status = $this->curl($url->url);
+            dump($status);
+            if ($status == $url->status_code) {
+                // отправляем сообщение
+
+                $this->updatePingNull($url->id, $current);
+                break;
+            }
+
+            if ($url->max_count_ping >= 1) {
+                $status = $this->curl($url->url);
+
+
+                if ($status == $url->status_code) {
+
+                    //отправляем сообщение true
+
+                    $this->updatePingNull($url->id, $current);
+                    break;
+                } else {
+
+                    $update = DB::table('urls')
+                        ->where('id', '=', $url->id)
+                        ->update([
+                            'ping_counter' => $url->ping_counter+1,
+                            'is_failed' => 1,
+                            'last_ping' => $current
+                        ]);
+
+
+                    if ($url->max_count_ping == $url->ping_counter) {
+
+                        $update = DB::table('urls')
+                            ->where('id', '=', $url->id)
+                            ->update([
+                                'is_failed' => 1,
+                                'is_sent_alert' => 1,
+                                'last_ping' => $current
+                            ]);
+                    }
+                }
+            }
+
+        }
+
+        dump($urls);
+    }
+
+    public function ping3()
+    {
+        $current = Carbon::now();
+        $current->format('Y-m-d H:i:s');
+
+        $urls = DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', true)
+            ->where('is_sent_alert', '=', true)
             ->get();
 
         foreach ($urls as $url) {
-            $update = DB::table('urls')
-                ->where('id', '=',$url->id)
-                ->update([
-                    'last_ping' => $current
-                ]);
+
+            $status = $this->curl($url->url);
+            dump($status);
+            if ($status == $url->status_code) {
+                // отправляем сообщение
+
+                $this->updatePingNull($url->id, $current);
+
+            }
+
 
         }
-//        dump($update);
+//yuri_test_laravel_bot
+//TELEGRAM_BOT_TOKEN =5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck
         dump($urls);
-
-//        $update =  $this->update();
-
-
     }
 }
