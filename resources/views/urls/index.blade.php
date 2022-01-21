@@ -115,7 +115,6 @@
                                 @foreach($urls as $key=> $data)
                                     @if(Auth::user()->id_project == $data->id_project && Auth::user()->role == 0)
                                         @php $count++; @endphp
-                                        <a>
                                             {{--                                            @dump($key)--}}
                                             <th scope="row">{{$count}}</th>
                                             <td>
@@ -129,12 +128,14 @@
                                             <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                             <td>
+                                                @method('update')
                                                 <a href="{{route('url.update', $data->id)}}">
                                                     <i style="color: #2563eb" class="fas fa-pen"></i>
                                                 </a>
                                             </td>
 
                                         <td>
+                                            @method('delete')
                                             <a href="{{route('url.destroy', $data->id)}}">
                                                 <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                             </a>
@@ -155,6 +156,7 @@
                                             <td>{{$data->created_at}}</td>
                                             <td><i style="color: #2563eb" class="fas fa-pen"></i></td>
                                             <td>
+                                                @method('delete')
                                                 <a href="{{route('url.destroy', $data->id)}}">
                                                     <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                                 </a>
