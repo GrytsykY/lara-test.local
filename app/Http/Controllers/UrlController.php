@@ -74,11 +74,11 @@ class UrlController extends Controller
     public function show(Url $urls, $id)
     {
 //        dd($id);
-        $urls = DB::table('urls')->where('id', '=', $id)->get();
-
-        $projects = DB::table('projects')->where('id', '=', $urls[0]->id_project)->get();
-
-        return view('urls.show', compact('urls', 'projects'));
+//        $urls = DB::table('urls')->where('id', '=', $id)->get();
+//
+//        $projects = DB::table('projects')->where('id', '=', $urls[0]->id_project)->get();
+//
+//        return view('urls.show', compact('urls', 'projects'));
 //        return redirect('index', $urls);
     }
 
@@ -109,11 +109,16 @@ class UrlController extends Controller
      * Remove the specified resource from storage.
      *
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Url $urls)
+    public function destroy($id)
     {
-        //
+
+        $url = Url::find($id);
+        if ($url) {
+            $url->delete();
+        }
+        return redirect()->route('url.index');
     }
 
     public function curl($url)
@@ -208,42 +213,43 @@ class UrlController extends Controller
                 // отправляем сообщение
 
                 $this->updatePingNull($url->id, $current);
-                break;
-            }
 
-            if ($url->max_count_ping == 1) {
-                $status = $this->curl($url->url);
+            } else {
+
+                if ($url->max_count_ping == 1) {
+                    $status = $this->curl($url->url);
 
 
-                if ($status == $url->status_code) {
+                    if ($status == $url->status_code) {
 
-                    //отправляем сообщение true
+                        //отправляем сообщение true
 
-                    $this->updatePingNull($url->id, $current);
+                        $this->updatePingNull($url->id, $current);
+                    } else {
+                        //отправляем сообщение false
+
+                        $update = DB::table('urls')
+                            ->where('id', '=', $url->id)
+                            ->update([
+                                'is_failed' => 1,
+                                'is_sent_alert' => 1,
+                                'last_ping' => $current
+                            ]);
+                    }
                 } else {
-                    //отправляем сообщение false
+
+                    if ($url->max_count_ping == $url->ping_counter) {
+                        dump(' alert');
+                    }
 
                     $update = DB::table('urls')
                         ->where('id', '=', $url->id)
                         ->update([
+                            'ping_counter' => $count,
                             'is_failed' => 1,
-                            'is_sent_alert' => 1,
                             'last_ping' => $current
                         ]);
                 }
-            } else {
-
-                if ($url->max_count_ping == $url->ping_counter) {
-                    dump(' alert');
-                }
-
-                $update = DB::table('urls')
-                    ->where('id', '=', $url->id)
-                    ->update([
-                        'ping_counter' => $count,
-                        'is_failed' => 1,
-                        'last_ping' => $current
-                    ]);
             }
 
         }
@@ -276,39 +282,40 @@ class UrlController extends Controller
                 // отправляем сообщение
 
                 $this->updatePingNull($url->id, $current);
-                break;
-            }
 
-            if ($url->max_count_ping >= 1) {
-                $status = $this->curl($url->url);
+            } else {
 
-
-                if ($status == $url->status_code) {
-
-                    //отправляем сообщение true
-
-                    $this->updatePingNull($url->id, $current);
-                    break;
-                } else {
-
-                    $update = DB::table('urls')
-                        ->where('id', '=', $url->id)
-                        ->update([
-                            'ping_counter' => $url->ping_counter + 1,
-                            'is_failed' => 1,
-                            'last_ping' => $current
-                        ]);
+                if ($url->max_count_ping >= 1) {
+                    $status = $this->curl($url->url);
 
 
-                    if ($url->max_count_ping == $url->ping_counter) {
+                    if ($status == $url->status_code) {
+
+                        //отправляем сообщение true
+
+                        $this->updatePingNull($url->id, $current);
+
+                    } else {
 
                         $update = DB::table('urls')
                             ->where('id', '=', $url->id)
                             ->update([
+                                'ping_counter' => $url->ping_counter + 1,
                                 'is_failed' => 1,
-                                'is_sent_alert' => 1,
                                 'last_ping' => $current
                             ]);
+
+
+                        if ($url->max_count_ping == $url->ping_counter) {
+
+                            $update = DB::table('urls')
+                                ->where('id', '=', $url->id)
+                                ->update([
+                                    'is_failed' => 1,
+                                    'is_sent_alert' => 1,
+                                    'last_ping' => $current
+                                ]);
+                        }
                     }
                 }
             }
@@ -332,7 +339,7 @@ class UrlController extends Controller
         foreach ($urls as $url) {
 
             $status = $this->curl($url->url);
-            dump($status);
+
             if ($status == $url->status_code) {
                 // отправляем сообщение
 
@@ -340,10 +347,12 @@ class UrlController extends Controller
 
             }
 
-
+            dump($url->url);
         }
 //yuri_test_laravel_bot
 //TELEGRAM_BOT_TOKEN =5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck
+
+//        dump($status);
         dump($urls);
     }
 }

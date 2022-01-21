@@ -43,6 +43,10 @@ input[type="submit"] {
     background: url(images/video.png) no-repeat 50% 50%; /* Параметры фона */
 }
 
+.select {
+    display: none;
+}
+
 /*#url{*/
 /*    background-color: #fc103f;*/
 /*}*/

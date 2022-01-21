@@ -60,7 +60,7 @@ $(document).ready(function () {
         let id_project = $('#project option:selected').attr('id');
         let choice = $('input[name="radio"]:checked').val();
 
-        console.log(id_project)
+        console.log(choice)
         console.log(time)
         console.log(name)
         console.log(status_code)
@@ -77,6 +77,16 @@ $(document).ready(function () {
 
         if (res == null && !error) {
             $('#url_label').after('<span class="error">Неверный url адрес</span>');
+            error = true;
+        }
+
+        if (name.length < 1) {
+            $('#name_label').after('<span class="error">Введите название</span>');
+            error = true;
+        }
+
+        if (choice == undefined) {
+            $('#radio_label').after('<span class="error">Выберите кнопку</span>');
             error = true;
         }
 
@@ -109,8 +119,27 @@ $(document).ready(function () {
             $('#count_label').after('<span class="error">Введите колличество запросов</span>');
             error = true;
         }
+        function addZero(i) {
+            if (i < 10) {
+                i = "0" + i;
+            }
+            return i;
+        }
 
+        function getActualFullDate() {
+            var d = new Date();
+            var day = addZero(d.getDate());
+            var month = addZero(d.getMonth()+1);
+            var year = addZero(d.getFullYear());
+            var h = addZero(d.getHours());
+            var m = addZero(d.getMinutes());
+            var s = addZero(d.getSeconds());
+            return day + "-" + month + "-" + year + " " + h + ":" + m + ":" + s;
+        }
 
+        var date_now = getActualFullDate();
+
+        console.log(date_now)
         if (error) return;
 
         $.ajax({
@@ -151,20 +180,24 @@ $(document).ready(function () {
                 }
 
                 if (data) {
-                    console.log(data)
+                    var d = new Date();
+                    var strDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + ' '+
+                                    d.getHours()+':'+d.getMinutes()+':'+d.getSeconds();
+                    console.log(strDate)
                     $('#mytable').append(`
                         <tr>
                         <th scope="row">${data.id}</th>
-                        <td><a href="url/${data.id}">${data.name}</a></td>
-                        <td>${data.last_ping}</td>
+                        <td><a style="color: #2563eb" href="${data.url}">${data.name}</a></td>
+                        <td>${date_now}</td>
                         <td>${data.time_out}</td>
                         <td>${data.status_code}</td>
                         <td>${data.max_count_ping}</td>
-                        <td>${data.created_at}</td>
+                        <td>${date_now}</td>
                     </tr>`)
                 }
                 if (!error) {
                     $("#time").val("");
+                    $("#name").val("");
                     $("#url_check").val("");
                     $("#status_code").val("");
                     $("#count_link").val("");
