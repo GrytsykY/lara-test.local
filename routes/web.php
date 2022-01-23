@@ -25,6 +25,7 @@ Route::get('/test', [TestController::class, 'index']);
 Route::resource('/url', UrlController::class)->middleware(['auth']);
 Route::resource('/alert', \App\Http\Controllers\AlertController::class);
 Route::post('/url/ajax-check-url', [UrlController::class, 'ajaxCheckUrl'])->name('ajaxCheckUrl');
+Route::get('/url/ajax-url-form/{id}', [UrlController::class, 'ajaxUrlProdForm'])->name('url.ajax-url-form');
 Route::get('url-ping/ping1', [UrlController::class, 'ping1'])->name('ping1');
 Route::get('url-ping/ping2', [UrlController::class, 'ping2'])->name('ping2');
 Route::get('url-ping/ping3', [UrlController::class, 'ping3'])->name('ping3');

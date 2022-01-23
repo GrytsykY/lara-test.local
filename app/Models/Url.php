@@ -27,6 +27,7 @@ class Url extends Model
 
     ];
 
+
     public function urls()
     {
         return $this->hasMany("App\Urls", "id_user", "id");

@@ -3,6 +3,30 @@ $(document).ready(function () {
     // document.getElementById("clearButton").onclick = function(e) {
     //     document.getElementById("textInput").value = "";
     // }
+    $('#project').on('click', () => {
+        let id_project = $('#project option:selected').attr('id');
+
+        $.ajax({
+            url: 'url/ajax-url-form/'+id_project,
+            type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+            // data: {
+            //     id: id_project
+            // },
+            success: function (response) {
+                $('.row').html(response);
+                console.log(response);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+
+        });
+
+        console.log(id_project)
+    })
 
     $('#check_url_btn').on('click', function () {
         let error = false;
@@ -30,12 +54,12 @@ $(document).ready(function () {
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
-            data:{
+            data: {
                 url_check: url_check
             },
             success: function (response) {
                 $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
-                $('#status_code').after(`${response.status}`);
+                $('#status_code').val(`${response.status}`);
                 console.log(response);
             },
             error: function (data) {
@@ -95,7 +119,7 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (time < 0 ) {
+        if (time < 0) {
             $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
             error = true;
         }
@@ -119,6 +143,7 @@ $(document).ready(function () {
             $('#count_label').after('<span class="error">Введите колличество запросов</span>');
             error = true;
         }
+
         function addZero(i) {
             if (i < 10) {
                 i = "0" + i;
@@ -129,19 +154,19 @@ $(document).ready(function () {
         function getActualFullDate() {
             var d = new Date();
             var day = addZero(d.getDate());
-            var month = addZero(d.getMonth()+1);
+            var month = addZero(d.getMonth() + 1);
             var year = addZero(d.getFullYear());
             var h = addZero(d.getHours());
             var m = addZero(d.getMinutes());
             var s = addZero(d.getSeconds());
-            return day + "-" + month + "-" + year + " " + h + ":" + m + ":" + s;
+            return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
         }
 
         var date_now = getActualFullDate();
 
         console.log(date_now)
         if (error) return;
-
+        console.log($('meta[name="csrf-token"]').attr('content'));
         $.ajax({
             url: "url",
             type: "POST",
@@ -176,23 +201,35 @@ $(document).ready(function () {
                         // document.querySelector('.error_mes div').classList.add('alert alert-danger');
 
                     }
-                    error=true;
+                    error = true;
                 }
 
                 if (data) {
-                    var d = new Date();
-                    var strDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + ' '+
-                                    d.getHours()+':'+d.getMinutes()+':'+d.getSeconds();
-                    console.log(strDate)
+
                     $('#mytable').append(`
-                        <tr>
-                        <th scope="row">${data.id}</th>
-                        <td><a style="color: #2563eb" href="${data.url}">${data.name}</a></td>
-                        <td>${date_now}</td>
-                        <td>${data.time_out}</td>
-                        <td>${data.status_code}</td>
-                        <td>${data.max_count_ping}</td>
-                        <td>${date_now}</td>
+                        <tr id="row_${data.id}">
+                            <th scope="row">${data.id}</th>
+                            <td><a style="color: #2563eb" href="${data.url}">${data.name}</a></td>
+                            <td>${date_now}</td>
+                            <td>${data.time_out}</td>
+                            <td>${data.status_code}</td>
+                            <td>${data.max_count_ping}</td>
+                            <td>${date_now}</td>
+                            <td>
+                                <form action="route('url.update',$data->id)" method="post">
+
+                                    <button type="submit">
+                                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                               <form>
+                                    <button class="delete-btn" type="submit" onclick="deleteUrl(${data.id})">
+                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
                     </tr>`)
                 }
                 if (!error) {
@@ -206,9 +243,38 @@ $(document).ready(function () {
             }
         });
         document.getElementById('error_mes').innerHTML = "";
-        console.log('ERROR '+ error)
+        console.log('ERROR ' + error)
 
     });
 
+    $('.delete-btn').click(function () {
+        var res = confirm('Вы действительно хотите удалить?');
+        if (!res){
+            return false;
+        }
+    })
 
 });
+
+function deleteUrl(event,id) {
+    console.log('ooool');
+    event.preventDefault();
+
+    $('.cou').text($(this).find('span').text())
+
+    let _url = `/url/`+id;
+
+    console.log(id);
+    $.ajax({
+        url: _url,
+        type: 'DELETE',
+        data: {"id": id , _method: 'delete'},
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            console.log(response);
+            $("#row_" + id).remove();
+        }
+    });
+}

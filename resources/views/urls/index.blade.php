@@ -30,10 +30,10 @@
                         <div class="col-5">
                             <div id="select_project">
                                 <label for="project"></label>
-                                <select id="project" class="control">
+                                <select id="project" class="project control">
                                     @foreach($projects as $project)
                                         @if($project->id == Auth::user()->id_project)
-                                            <option id="{{$project->id}}">{{$project->title}}</option>
+                                            <option id="{{$project->id}}"><a href="{{route('url.ajax-url-form',$project->id)}}">{{$project->title}}</a></option>
                                         @elseif(Auth::user()->role == 1)
                                             <option id="{{$project->id}}">{{$project->title}}</option>
                                         @endif
@@ -115,7 +115,9 @@
                                 @foreach($urls as $key=> $data)
                                     @if(Auth::user()->id_project == $data->id_project && Auth::user()->role == 0)
                                         @php $count++; @endphp
-                                            {{--                                            @dump($key)--}}
+                                        {{--                                            @dump($key)--}}
+                                        @csrf
+                                        <tr id="row_{{$data->id}}">
                                             <th scope="row">{{$count}}</th>
                                             <td>
                                                 <a style="color: #2563eb" href="{{$data->url}}" target="_blank">
@@ -128,21 +130,28 @@
                                             <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                             <td>
-                                                @method('update')
-                                                <a href="{{route('url.update', $data->id)}}">
-                                                    <i style="color: #2563eb" class="fas fa-pen"></i>
-                                                </a>
+                                                <form action="{{route('url.edit',$data->id)}}" method="post">
+                                                    @method('GET')
+                                                    @csrf
+                                                    <button type="submit">
+                                                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                                                    </button>
+                                                </form>
                                             </td>
 
-                                        <td>
-                                            @method('delete')
-                                            <a href="{{route('url.destroy', $data->id)}}">
-                                                <i style="color: #eb2549" class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </td>
+                                            <td>
+                                                <form action="{{route('url.destroy',$data->id)}}" method="post">
+                                                    @method('DELETE')
+                                                    @csrf
+                                                    <button class="delete-btn" type="submit">
+                                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     @elseif(Auth::user()->role == 1)
-                                        <tr>
+                                        @csrf
+                                        <tr id="row_{{$data->id}}">
                                             <th scope="row">{{$key+1}}</th>
                                             <td>
                                                 <a style="color: #2563eb" href="{{$data->url}}" target="_blank">
@@ -154,12 +163,23 @@
                                             <td>{{$data->status_code}}</td>
                                             <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
-                                            <td><i style="color: #2563eb" class="fas fa-pen"></i></td>
                                             <td>
-                                                @method('delete')
-                                                <a href="{{route('url.destroy', $data->id)}}">
-                                                    <i style="color: #eb2549" class="fas fa-trash-alt"></i>
-                                                </a>
+                                                <form action="{{route('url.edit',$data->id)}}" method="post">
+                                                    @method('GET')
+                                                    @csrf
+                                                    <button type="submit">
+                                                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <form action="{{route('url.destroy',$data->id)}}" method="post">
+                                                    @method('DELETE')
+                                                    @csrf
+                                                    <button class="delete-btn" type="submit" data-bs-target="#exampleModal">
+                                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @endif
@@ -172,4 +192,6 @@
             </div>
         </div>
     </div>
+
+
 </x-app-layout>

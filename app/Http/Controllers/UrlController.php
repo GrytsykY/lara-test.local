@@ -16,9 +16,9 @@ class UrlController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $urls = Url::all();
@@ -69,11 +69,11 @@ class UrlController extends Controller
      * Display the specified resource.
      *
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application
      */
     public function show(Url $urls, $id)
     {
-//        dd($id);
+        dd($id);
 //        $urls = DB::table('urls')->where('id', '=', $id)->get();
 //
 //        $projects = DB::table('projects')->where('id', '=', $urls[0]->id_project)->get();
@@ -88,9 +88,14 @@ class UrlController extends Controller
      * @param \App\Models\Url $urls
      * @return \Illuminate\Http\Response
      */
-    public function edit(Url $urls)
+    public function edit(Url $urls, $id)
     {
-        //
+        $urls = Url::find($id);
+        $projects = Project::all();
+
+        $alerts = Alert::all();
+
+        return view('urls.edit', compact('urls','projects','alerts'));
     }
 
     /**
@@ -100,9 +105,9 @@ class UrlController extends Controller
      * @param \App\Models\Url $urls
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Url $urls)
+    public function update(Request $request, $id)
     {
-        //
+        dd($id);
     }
 
     /**
@@ -119,6 +124,22 @@ class UrlController extends Controller
             $url->delete();
         }
         return redirect()->route('url.index');
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    protected function ajaxUrlProdForm(Request $request, $id)
+    {
+
+        $urls = DB::table('urls')->where('id_project','=',$id)->get();
+//        dd($urls);
+        $projects = Project::all();
+        $alerts = Alert::all();
+        if ($request->ajax()) {
+            return view('ajax.ajaxUrlShow', compact('urls', 'projects', 'alerts'))->render();
+        }
     }
 
     public function curl($url)
@@ -202,10 +223,8 @@ class UrlController extends Controller
             ->get();
 
 //        $count_ping = DB::table('urls')->pluck('max_count_ping');
-        $count = 0;
 
         foreach ($urls as $url) {
-            $count++;
 
             $status = $this->curl($url->url);
             dump($status);
@@ -221,8 +240,6 @@ class UrlController extends Controller
 
 
                     if ($status == $url->status_code) {
-
-                        //отправляем сообщение true
 
                         $this->updatePingNull($url->id, $current);
                     } else {
@@ -245,7 +262,7 @@ class UrlController extends Controller
                     $update = DB::table('urls')
                         ->where('id', '=', $url->id)
                         ->update([
-                            'ping_counter' => $count,
+                            'ping_counter' => $url->ping_counter + 1,
                             'is_failed' => 1,
                             'last_ping' => $current
                         ]);
@@ -266,7 +283,7 @@ class UrlController extends Controller
         $current->format('Y-m-d H:i:s');
 
         $urls = DB::table("urls")
-            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL 1 MINUTE)")
             ->where('is_failed', '=', true)
             ->where('is_sent_alert', '=', false)
             ->get();

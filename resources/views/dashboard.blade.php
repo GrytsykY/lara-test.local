@@ -113,30 +113,17 @@
                         </div>
                     </div>
 
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
-                    <script>
-
-                        $('#urlForm').on('submit', function (event) {
-                            alert('ol')
-                            event.preventDefault();
-                            console.log('ok');
-                            let url = $('#url').val();
-
-                            $.ajax({
-                                url: "test",
-                                type: "GET",
-                                data: {
-                                    "_token": "{{ csrf_token() }}",
-                                    url: url
-                                },
-                                success: function (response) {
-                                    console.log(response);
-                                },
-                            });
-                        });
-                    </script>
                 </div>
             </div>
         </div>
     </div>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+
+        <x-dropdown-link :href="route('logout')"
+                         onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+            {{ __('ВЫХОД') }}
+        </x-dropdown-link>
+    </form>
 </x-app-layout>
