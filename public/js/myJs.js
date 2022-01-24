@@ -263,31 +263,39 @@ function deleteUrl(id) {
         title: 'Удаления!',
         content: 'Вы хотите удалить?',
         buttons: {
-            удалить: function () {
 
-                $.alert('Удалить!');
-                $.ajax({
-                    url: 'url/' + id,
-                    type: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    },
-                    data: {
-                        _method: 'delete'
-                    },
-                    success: function (response) {
-                        // $('#mytable').html(response);
-                        // checkUrl();
-                        console.log(response);
-                    },
-                    error: function (data) {
-                        console.log(data);
-                    }
+            удалить: {
+                btnClass: 'btn-red',
+                action: function () {
 
-                });
+                    // $.alert('Удалить!');
+                    $.ajax({
+                        url: 'url/' + id,
+                        type: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        },
+                        data: {
+                            _method: 'delete'
+                        },
+                        success: function (response) {
+                            $('#mytable').html(response);
+                            // checkUrl();
+                            console.log(response);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+
+                    });
+                },
+
             },
-            отмена: function () {
-                $.alert('Отмеить!');
+            отмена: {
+                btnClass: 'btn-blue',
+                action: function () {
+                    // $.alert('Отменить!');
+                }
             }
         }
     });

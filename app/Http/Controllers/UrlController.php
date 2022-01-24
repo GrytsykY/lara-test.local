@@ -95,7 +95,7 @@ class UrlController extends Controller
         $projects = Project::all();
         $alerts = Alert::all();
 
-        return view('urls.edit', compact('urls','projects','alerts'));
+        return view('urls.edit', compact('urls', 'projects', 'alerts'));
     }
 
     /**
@@ -125,7 +125,7 @@ class UrlController extends Controller
 //        dd($request);
         $urls->update($request->all());
 
-        return redirect()->route('url.edit',$id)->with('success','Успешно обновлено.');
+        return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
     }
 
     /**
@@ -137,11 +137,14 @@ class UrlController extends Controller
     public function destroy($id)
     {
 
-        $url = Url::find($id);
-        if ($url) {
-            $url->delete();
+        $urls = Url::find($id);
+        if ($urls) {
+            $urls->delete();
         }
-        return redirect()->route('url.index');
+//        return redirect()->route('url.index');
+
+        return view('ajax.ajaxUrlShow', compact('urls'))->render();
+
     }
 
     /**
@@ -151,7 +154,7 @@ class UrlController extends Controller
     protected function ajaxUrlProdForm(Request $request, $id)
     {
 
-        $urls = DB::table('urls')->where('id_project','=',$id)->get();
+        $urls = DB::table('urls')->where('id_project', '=', $id)->get();
 //        dd($urls);
         $projects = Project::all();
         $alerts = Alert::all();
