@@ -86,13 +86,13 @@ class UrlController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
     public function edit(Url $urls, $id)
     {
+//        dd($id);
         $urls = Url::find($id);
         $projects = Project::all();
-
         $alerts = Alert::all();
 
         return view('urls.edit', compact('urls','projects','alerts'));
@@ -105,9 +105,27 @@ class UrlController extends Controller
      * @param \App\Models\Url $urls
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Url $urls, $id)
     {
-        dd($id);
+//        dd($id);
+        $urls = Url::find($id);
+//        dd($request);
+
+        $request->validate([
+            'url' => 'required|max:2048',
+            'name' => 'required|string|min:3',
+            'time_out' => 'required|integer|max:60',
+            'status_code' => 'required|integer|min:200|max:500',
+            'max_count_ping' => 'required|integer|min:1|max:50',
+            'id_alert' => 'required|integer|exists:alerts,id',
+//            'id_user' => 'required|integer|exists:users,id',
+            'id_project' => 'required|integer|exists:projects,id',
+        ]);
+
+//        dd($request);
+        $urls->update($request->all());
+
+        return redirect()->route('url.edit',$id)->with('success','Успешно обновлено.');
     }
 
     /**

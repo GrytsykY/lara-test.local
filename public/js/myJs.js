@@ -1,13 +1,62 @@
 $(document).ready(function () {
+    const URI = 'http://lara-test.local/';
+
+    function checkUrl() {
+        $('#check_url_btn').on('click', function () {
+            let error = false;
+            $('#status_code').val('');
+            let url_check = $('#url_check').val();
+
+            $(".error").remove();
+            $('.status').remove();
+            if (url_check.length < 1) {
+                $('#url_label').after('<span class="error">Введите url</span>');
+                error = true;
+            }
+
+            var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+            if (res == null && !error) {
+                $('#url_label').after('<span class="error">Неверный url адрес</span>');
+                error = true;
+            }
+
+            if (error) return;
+
+            $.ajax({
+                url: URI + 'url/ajax-check-url',
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                },
+                data: {
+                    url_check: url_check
+                },
+                success: function (response) {
+                    $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
+                    $('#status_code').val(`${response.status}`);
+                    console.log(response);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+
+            });
+            // if (!error) $('#url_check').val('');
+
+        });
+    }
+
 
     // document.getElementById("clearButton").onclick = function(e) {
     //     document.getElementById("textInput").value = "";
     // }
-    $('#project').on('click', () => {
-        let id_project = $('#project option:selected').attr('id');
 
+
+    $('#project').on('change', () => {
+        let id_project = $('#project option:selected').attr('id');
+        console.log(id_project);
         $.ajax({
-            url: 'url/ajax-url-form/'+id_project,
+            url: URI + 'url/ajax-url-form/' + id_project,
             type: "GET",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -16,7 +65,8 @@ $(document).ready(function () {
             //     id: id_project
             // },
             success: function (response) {
-                $('.row').html(response);
+                $('#mytable').html(response);
+                checkUrl();
                 console.log(response);
             },
             error: function (data) {
@@ -28,48 +78,7 @@ $(document).ready(function () {
         console.log(id_project)
     })
 
-    $('#check_url_btn').on('click', function () {
-        let error = false;
-
-        let url_check = $('#url_check').val();
-
-        $(".error").remove();
-        $('.status').remove();
-        if (url_check.length < 1) {
-            $('#url_label').after('<span class="error">Введите url</span>');
-            error = true;
-        }
-
-        var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-        if (res == null && !error) {
-            $('#url_label').after('<span class="error">Неверный url адрес</span>');
-            error = true;
-        }
-
-        if (error) return;
-
-        $.ajax({
-            url: 'url/ajax-check-url',
-            type: "POST",
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            data: {
-                url_check: url_check
-            },
-            success: function (response) {
-                $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
-                $('#status_code').val(`${response.status}`);
-                console.log(response);
-            },
-            error: function (data) {
-                console.log(data);
-            }
-
-        });
-        // if (!error) $('#url_check').val('');
-
-    });
+    checkUrl();
 
     $('#save_form_btn').on('click', function (event) {
 
@@ -168,7 +177,7 @@ $(document).ready(function () {
         if (error) return;
         console.log($('meta[name="csrf-token"]').attr('content'));
         $.ajax({
-            url: "url",
+            url: URI + "url",
             type: "POST",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -216,7 +225,7 @@ $(document).ready(function () {
                             <td>${data.max_count_ping}</td>
                             <td>${date_now}</td>
                             <td>
-                                <form action="route('url.update',$data->id)" method="post">
+                                <form action="url/${data.id}/edit" method="get">
 
                                     <button type="submit">
                                         <i style="color: #2563eb" class="fas fa-pen"></i>
@@ -224,11 +233,9 @@ $(document).ready(function () {
                                 </form>
                             </td>
                             <td>
-                               <form>
-                                    <button class="delete-btn" type="submit" onclick="deleteUrl(${data.id})">
-                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                               <button type="submit" onclick="deleteUrl(${data.id})">
+                                  <i style="color: #eb2549" class="fas fa-trash-alt"></i>
+                               </button>
                             </td>
                     </tr>`)
                 }
@@ -247,34 +254,43 @@ $(document).ready(function () {
 
     });
 
-    $('.delete-btn').click(function () {
-        var res = confirm('Вы действительно хотите удалить?');
-        if (!res){
-            return false;
-        }
-    })
 
 });
 
-function deleteUrl(event,id) {
-    console.log('ooool');
-    event.preventDefault();
+function deleteUrl(id) {
 
-    $('.cou').text($(this).find('span').text())
+    $.confirm({
+        title: 'Удаления!',
+        content: 'Вы хотите удалить?',
+        buttons: {
+            удалить: function () {
 
-    let _url = `/url/`+id;
+                $.alert('Удалить!');
+                $.ajax({
+                    url: 'url/' + id,
+                    type: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    },
+                    data: {
+                        _method: 'delete'
+                    },
+                    success: function (response) {
+                        // $('#mytable').html(response);
+                        // checkUrl();
+                        console.log(response);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
 
-    console.log(id);
-    $.ajax({
-        url: _url,
-        type: 'DELETE',
-        data: {"id": id , _method: 'delete'},
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function (response) {
-            console.log(response);
-            $("#row_" + id).remove();
+                });
+            },
+            отмена: function () {
+                $.alert('Отмеить!');
+            }
         }
     });
+
 }
+

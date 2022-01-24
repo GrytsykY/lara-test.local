@@ -29,13 +29,18 @@
                     <div class="row">
                         <div class="col-5">
                             <div id="select_project">
-                                <label for="project"></label>
+                                <label for="project">Название проекта</label><br>
                                 <select id="project" class="project control">
                                     @foreach($projects as $project)
+                                        @php $sel = ""; @endphp
+
                                         @if($project->id == Auth::user()->id_project)
-                                            <option id="{{$project->id}}"><a href="{{route('url.ajax-url-form',$project->id)}}">{{$project->title}}</a></option>
+                                            <option id="{{$project->id}}" {{$sel}}>
+                                                {{$project->title}}</option>
                                         @elseif(Auth::user()->role == 1)
-                                            <option id="{{$project->id}}">{{$project->title}}</option>
+                                            <option id="{{$project->id}}" {{$sel}}>
+                                                {{$project->title}}
+                                            </option>
                                         @endif
                                     @endforeach
                                 </select>
@@ -143,13 +148,14 @@
                                                 <form action="{{route('url.destroy',$data->id)}}" method="post">
                                                     @method('DELETE')
                                                     @csrf
-                                                    <button class="delete-btn" type="submit">
+                                                    <button class="delete-btn" type="submit"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteModal">
                                                         <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
                                             </td>
                                         </tr>
-                                    @elseif(Auth::user()->role == 1)
+                                    @elseif(Auth::user()->role == 1 && $data->id_project == 1)
                                         @csrf
                                         <tr id="row_{{$data->id}}">
                                             <th scope="row">{{$key+1}}</th>
@@ -173,13 +179,9 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                <form action="{{route('url.destroy',$data->id)}}" method="post">
-                                                    @method('DELETE')
-                                                    @csrf
-                                                    <button class="delete-btn" type="submit" data-bs-target="#exampleModal">
-                                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="submit" onclick="deleteUrl({{$data->id}})">
+                                                    <i style="color: #eb2549" class="fas fa-trash-alt"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     @endif
@@ -195,3 +197,28 @@
 
 
 </x-app-layout>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">
+    Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal"  aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h5 style="color: red" class="modal-title" id="exampleModalLabel">УДАЛЕНИЯ</h5>
+                <button style="color: red" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы действительно хотите удалить?
+            </div>
+            <div class="modal-footer">
+                <button id="btn_no" style="background-color: #6b7280" type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">НЕТ
+                </button>
+                <button id="btn_yes" style="background-color: red" type="button" class="btn btn-primary">ДА</button>
+            </div>
+        </div>
+    </div>
+</div>
