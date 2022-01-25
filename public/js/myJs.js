@@ -33,7 +33,7 @@ $(document).ready(function () {
                     url_check: url_check
                 },
                 success: function (response) {
-                    $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
+                    // $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
                     $('#status_code').val(`${response.status}`);
                     console.log(response);
                 },
@@ -43,7 +43,7 @@ $(document).ready(function () {
 
             });
             // if (!error) $('#url_check').val('');
-
+            $('#status_code').val('');
         });
     }
 
@@ -68,6 +68,7 @@ $(document).ready(function () {
             success: function (response) {
                 $('#mytable').html(response);
                 checkUrl();
+                $('#status_code').val('');
                 console.log(response);
             },
             error: function (data) {
@@ -137,7 +138,7 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (time > 40 ) {
+        if (time > 40) {
             $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
             error = true;
         }
@@ -209,7 +210,6 @@ $(document).ready(function () {
                             <td>${date_now}</td>
                             <td>
                                 <form action="url/${data.id}/edit" method="get">
-
                                     <button type="submit">
                                         <i style="color: #2563eb" class="fas fa-pen"></i>
                                     </button>
@@ -236,7 +236,6 @@ $(document).ready(function () {
         console.log('ERROR ' + error)
 
     });
-
 
 });
 
@@ -305,6 +304,98 @@ function editUrl(id) {
     });
 }
 
+function updateButton(id) {
+
+    let url_check = $('#url_check').val();
+    let time = $('#time').val();
+    let name = $('#name').val();
+    let status_code = $('#status_code').val();
+    let count_link = $('#count_link').val();
+    let id_project = $('#project option:selected').attr('id');
+    let choice = $('input[name="id_alert"]:checked').val();
+    let id_proj = $('#id_project').val();
+
+    if (id_project == undefined) id_project = id_proj;
+
+    var error = false;
+
+    if (url_check.length < 1) {
+        $('#url_label').after('<span class="error">Введите url</span>');
+        error = true;
+    }
+
+    var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+
+    if (res == null && !error) {
+        $('#url_label').after('<span class="error">Неверный url адрес</span>');
+        error = true;
+    }
+
+    if (name.length < 1) {
+        $('#name_label').after('<span class="error">Введите название</span>');
+        error = true;
+    }
+
+    if (choice == undefined) {
+        $('#radio_label').after('<span class="error">Выберите кнопку</span>');
+        error = true;
+    }
+
+    if (time.length < 1) {
+        $('#time_label').after('<span class="error">Введите время</span>');
+        error = true;
+    }
+
+    if (time < 0) {
+        $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
+        error = true;
+    }
+
+    if (time > 40) {
+        $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
+        error = true;
+    }
+
+    if (status_code.length < 1) {
+        $('#code_label').after('<span class="error">Введите код</span>');
+        error = true;
+    }
+
+    if (status_code < 200 || status_code > 500) {
+        $('#code_label').after('<span class="error">Не верный код</span>');
+        error = true;
+    }
+
+    if (count_link.length < 1) {
+        $('#count_label').after('<span class="error">Введите колличество запросов</span>');
+        error = true;
+    }
+
+    if (error) return;
+
+    $.ajax({
+        url: 'url/' + id,
+        type: "POST",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        },
+        data: {
+            _method: 'PUT',
+            url: url_check,
+            name: name,
+            time_out: time,
+            max_count_ping: count_link,
+            status_code: status_code,
+            id_alert: choice,
+            id_project: id_project,
+        },
+        success: function (data) {
+            $('.py-12').html(data);
+            console.log(data)
+        }
+    });
+}
+
 function addZero(i) {
     if (i < 10) {
         i = "0" + i;
@@ -322,6 +413,7 @@ function getActualFullDate() {
     var s = addZero(d.getSeconds());
     return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
 }
+
 // $('.btn_del').click(function (r){
 //     r.preventDefault();
 //     deleteUrl(this.dataset.id);

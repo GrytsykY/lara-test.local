@@ -127,6 +127,7 @@ class UrlController extends Controller
             'id_project' => 'required|integer|exists:projects,id',
         ]);
 
+
         $urls->update($request->all());
 
         return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
