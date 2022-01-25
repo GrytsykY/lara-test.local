@@ -18,11 +18,19 @@ class UrlController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application
      */
-    public function index(Request $request)
+    public function index()
     {
 
-        $urls = Url::all();
-        $projects = Project::all();
+        $user = \Auth::user();
+
+        if ($user->role == 0) {
+            $urls = DB::table('urls')->where('id_project','=', $user->id_project)->get();
+            $projects = DB::table('projects')->where('id','=', $user->id_project)->get();
+        } else {
+            $urls = Url::all();
+            $projects = Project::all();
+        }
+//        dd($projects);
         $alerts = Alert::all();
 
         return view('urls.index', compact('urls', 'projects', 'alerts'));
@@ -73,29 +81,28 @@ class UrlController extends Controller
      */
     public function show(Url $urls, $id)
     {
-        dd($id);
-//        $urls = DB::table('urls')->where('id', '=', $id)->get();
-//
-//        $projects = DB::table('projects')->where('id', '=', $urls[0]->id_project)->get();
-//
-//        return view('urls.show', compact('urls', 'projects'));
-//        return redirect('index', $urls);
+
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return string
      */
-    public function edit(Url $urls, $id)
+    public function edit(Url $urls, $id): string
     {
-//        dd($id);
+        $user = \Auth::user();
+
+        if ($user->role == 0) {
+            $projects = DB::table('projects')->where('id','=', $user->id_project)->get();
+        } else {
+            $projects = Project::all();
+        }
         $urls = Url::find($id);
-        $projects = Project::all();
         $alerts = Alert::all();
 
-        return view('urls.edit', compact('urls', 'projects', 'alerts'));
+        return view('urls.edit', compact('urls', 'projects', 'alerts'))->render();
     }
 
     /**
@@ -103,13 +110,12 @@ class UrlController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Url $urls, $id)
     {
-//        dd($id);
         $urls = Url::find($id);
-//        dd($request);
+
 
         $request->validate([
             'url' => 'required|max:2048',
@@ -118,11 +124,9 @@ class UrlController extends Controller
             'status_code' => 'required|integer|min:200|max:500',
             'max_count_ping' => 'required|integer|min:1|max:50',
             'id_alert' => 'required|integer|exists:alerts,id',
-//            'id_user' => 'required|integer|exists:users,id',
             'id_project' => 'required|integer|exists:projects,id',
         ]);
 
-//        dd($request);
         $urls->update($request->all());
 
         return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
@@ -132,16 +136,17 @@ class UrlController extends Controller
      * Remove the specified resource from storage.
      *
      * @param \App\Models\Url $urls
-     * @return \Illuminate\Http\RedirectResponse
+     * @return string
      */
-    public function destroy($id)
+    public function destroy(Url $urls,$id)
     {
 
-        $urls = Url::find($id);
-        if ($urls) {
-            $urls->delete();
-        }
-//        return redirect()->route('url.index');
+        $url = Url::find($id);
+        if ($url) $url->delete();
+
+        $urls = DB::table('urls')
+            ->where('id_project','=',$url->id_project)
+            ->get();
 
         return view('ajax.ajaxUrlShow', compact('urls'))->render();
 
@@ -155,11 +160,9 @@ class UrlController extends Controller
     {
 
         $urls = DB::table('urls')->where('id_project', '=', $id)->get();
-//        dd($urls);
-        $projects = Project::all();
-        $alerts = Alert::all();
+
         if ($request->ajax()) {
-            return view('ajax.ajaxUrlShow', compact('urls', 'projects', 'alerts'))->render();
+            return view('ajax.ajaxUrlShow', compact('urls'))->render();
         }
     }
 
@@ -189,34 +192,33 @@ class UrlController extends Controller
 
         $status = $this->curl($url);
 
+//        $message = [];
+//        foreach ($urls as $value) {
+//            foreach ($users as $user) {
+//                if ($user->id == $value->id_user) {
+//                    if ($status == $value->status_code) {
+//
+//                        $message[] = [
+//                            'success ' => 'Success',
+//                            'user_name' => $user->name,
+//                            'id_user' => $user->id,
+//                            'url' => $value->url,
+//                            'code' => $value->status_code,
+//                        ];
+//                    } else {
+//                        $message[] = [
+//                            'success ' => 'Error',
+//                            'user_name' => $user->name,
+//                            'id_user' => $user->id,
+//                            'url' => $value->url,
+//                            'code' => $value->status_code,
+//                        ];
+//                    }
+//                }
+//            }
+//        }
 
-        $message = [];
-        foreach ($urls as $value) {
-            foreach ($users as $user) {
-                if ($user->id == $value->id_user) {
-                    if ($status == $value->status_code) {
-
-                        $message[] = [
-                            'success ' => 'Success',
-                            'user_name' => $user->name,
-                            'id_user' => $user->id,
-                            'url' => $value->url,
-                            'code' => $value->status_code,
-                        ];
-                    } else {
-                        $message[] = [
-                            'success ' => 'Success',
-                            'user_name' => $user->name,
-                            'id_user' => $user->id,
-                            'url' => $value->url,
-                            'code' => $value->status_code,
-                        ];
-                    }
-                }
-            }
-        }
-
-        return response()->json(['status' => $status, 'message' => $message]);
+        return response()->json(['status' => $status]);
     }
 
     public function updatePingNull($id, $current)

@@ -1,6 +1,7 @@
 $(document).ready(function () {
     const URI = 'http://lara-test.local/';
 
+    /* Проверка URL */
     function checkUrl() {
         $('#check_url_btn').on('click', function () {
             let error = false;
@@ -51,7 +52,7 @@ $(document).ready(function () {
     //     document.getElementById("textInput").value = "";
     // }
 
-
+    /*  Выбор проектов */
     $('#project').on('change', () => {
         let id_project = $('#project option:selected').attr('id');
         console.log(id_project);
@@ -79,7 +80,7 @@ $(document).ready(function () {
     })
 
     checkUrl();
-
+    /* Сохранение формы */
     $('#save_form_btn').on('click', function (event) {
 
         var error = false;
@@ -92,8 +93,11 @@ $(document).ready(function () {
         let count_link = $('#count_link').val();
         let id_project = $('#project option:selected').attr('id');
         let choice = $('input[name="radio"]:checked').val();
+        let id_proj = $('#id_project_input').val();
 
-        console.log(choice)
+        if (id_project == undefined) id_project = id_proj;
+
+        console.log(id_project)
         console.log(time)
         console.log(name)
         console.log(status_code)
@@ -133,42 +137,24 @@ $(document).ready(function () {
             error = true;
         }
 
-        // if (time > 40 ) {
-        //     $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
-        //     error = true;
-        // }
+        if (time > 40 ) {
+            $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
+            error = true;
+        }
 
         if (status_code.length < 1) {
             $('#code_label').after('<span class="error">Введите код</span>');
             error = true;
         }
 
-        // if (status_code < 200 || status_code > 500) {
-        //     $('#code_label').after('<span class="error">Не верный код</span>');
-        //     error = true;
-        // }
+        if (status_code < 200 || status_code > 500) {
+            $('#code_label').after('<span class="error">Не верный код</span>');
+            error = true;
+        }
 
         if (count_link.length < 1) {
             $('#count_label').after('<span class="error">Введите колличество запросов</span>');
             error = true;
-        }
-
-        function addZero(i) {
-            if (i < 10) {
-                i = "0" + i;
-            }
-            return i;
-        }
-
-        function getActualFullDate() {
-            var d = new Date();
-            var day = addZero(d.getDate());
-            var month = addZero(d.getMonth() + 1);
-            var year = addZero(d.getFullYear());
-            var h = addZero(d.getHours());
-            var m = addZero(d.getMinutes());
-            var s = addZero(d.getSeconds());
-            return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
         }
 
         var date_now = getActualFullDate();
@@ -206,9 +192,6 @@ $(document).ready(function () {
                         li.innerHTML = response.error[i];
                         ul.appendChild(li);
                         document.getElementById('error_mes').appendChild(ul);
-                        // document.getElementById('error_mes').classList.add("alert alert-danger");
-                        // document.querySelector('.error_mes div').classList.add('alert alert-danger');
-
                     }
                     error = true;
                 }
@@ -233,7 +216,7 @@ $(document).ready(function () {
                                 </form>
                             </td>
                             <td>
-                               <button type="submit" onclick="deleteUrl(${data.id})">
+                               <button onclick="deleteUrl(${data.id},'${data.name}')">
                                   <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                </button>
                             </td>
@@ -257,18 +240,19 @@ $(document).ready(function () {
 
 });
 
-function deleteUrl(id) {
+function deleteUrl(id, name) {
 
     $.confirm({
-        title: 'Удаления!',
-        content: 'Вы хотите удалить?',
+        title: 'Удаление!',
+        content: 'Вы хотите удалить ' + name + ' ?',
         buttons: {
 
-            удалить: {
+            Удалить: {
                 btnClass: 'btn-red',
                 action: function () {
 
                     // $.alert('Удалить!');
+                    console.log(id);
                     $.ajax({
                         url: 'url/' + id,
                         type: "POST",
@@ -276,7 +260,8 @@ function deleteUrl(id) {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         },
                         data: {
-                            _method: 'delete'
+                            _method: 'delete',
+                            id: id
                         },
                         success: function (response) {
                             $('#mytable').html(response);
@@ -291,7 +276,7 @@ function deleteUrl(id) {
                 },
 
             },
-            отмена: {
+            Отменить: {
                 btnClass: 'btn-blue',
                 action: function () {
                     // $.alert('Отменить!');
@@ -301,4 +286,44 @@ function deleteUrl(id) {
     });
 
 }
+
+function editUrl(id) {
+    $.ajax({
+        url: 'url/' + id + '/edit',
+        type: "GET",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function (response) {
+            $('.py-12').html(response);
+            console.log(response);
+        },
+        error: function (data) {
+            console.log(data);
+        }
+
+    });
+}
+
+function addZero(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+function getActualFullDate() {
+    var d = new Date();
+    var day = addZero(d.getDate());
+    var month = addZero(d.getMonth() + 1);
+    var year = addZero(d.getFullYear());
+    var h = addZero(d.getHours());
+    var m = addZero(d.getMinutes());
+    var s = addZero(d.getSeconds());
+    return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
+}
+// $('.btn_del').click(function (r){
+//     r.preventDefault();
+//     deleteUrl(this.dataset.id);
+// });
 

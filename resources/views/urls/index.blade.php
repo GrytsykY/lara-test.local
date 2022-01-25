@@ -1,17 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight text-center">
-            @foreach($projects as $prod)
-                @if (Auth::user()->role == 0 && Auth::user()->id_project == $prod->id)
-                    {{ __($prod->title) }}
-                @endif
-            @endforeach
-            @if(Auth::user()->role == 1)
-                {{ __('ADMIN') }}
-            @endif
-        </h2>
-    </x-slot>
-
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -21,31 +8,28 @@
                     <div id="error_mes" class="error_mes">
 
                     </div>
-                    {{--                    <a href="{{route('ping1')}}">URL</a>--}}
-                    {{--                    <div class="search">--}}
-                    {{--                        <input id="textInput" class="search" type="text" value=""/>--}}
-                    {{--                        <input id="clearButton" class="submit" value="Clear" />--}}
-                    {{--                    </div>--}}
-                    <div class="row">
-                        <div class="col-5">
-                            <div id="select_project">
-                                <label for="project">Название проекта</label><br>
-                                <select id="project" class="project control">
-                                    @foreach($projects as $project)
-                                        @php $sel = ""; @endphp
 
-                                        @if($project->id == Auth::user()->id_project)
-                                            <option id="{{$project->id}}" {{$sel}}>
-                                                {{$project->title}}</option>
-                                        @elseif(Auth::user()->role == 1)
+                    <div class="row">
+                        @if(Auth::user()->role == 0)
+                            <h2 style="font-size: 24px" class="text-center"><b>{{ __($projects[0]->title) }}</b></h2>
+                            <input id="id_project_input" type="hidden" value="{{$projects[0]->id}}">
+                        @endif
+                        <div class="col-5">
+                            @if(Auth::user()->role == 1)
+                                <div id="select_project">
+                                    <label for="project">Название проекта</label><br>
+                                    <select id="project" class="project control">
+                                        @foreach($projects as $project)
+                                            @php $sel = ""; @endphp
+
                                             <option id="{{$project->id}}" {{$sel}}>
                                                 {{$project->title}}
                                             </option>
-                                        @endif
-                                    @endforeach
-                                </select>
 
-                            </div>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                             <div>
                                 <label>Введите название</label><br>
                                 <input id="name" class="control" type="text" value="">
@@ -118,10 +102,9 @@
                                 <tbody>
                                 @php $count = 0; @endphp
                                 @foreach($urls as $key=> $data)
-                                    @if(Auth::user()->id_project == $data->id_project && Auth::user()->role == 0)
+                                    @if((Auth::user()->id_project == $data->id_project))
                                         @php $count++; @endphp
-                                        {{--                                            @dump($key)--}}
-                                        @csrf
+
                                         <tr id="row_{{$data->id}}">
                                             <th scope="row">{{$count}}</th>
                                             <td>
@@ -135,51 +118,13 @@
                                             <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                             <td>
-                                                <form action="{{route('url.edit',$data->id)}}" method="post">
-                                                    @method('GET')
-                                                    @csrf
-                                                    <button type="submit">
-                                                        <i style="color: #2563eb" class="fas fa-pen"></i>
-                                                    </button>
-                                                </form>
+                                                <button onclick="editUrl({{$data->id}})">
+                                                    <i style="color: #2563eb" class="fas fa-pen"></i>
+                                                </button>
                                             </td>
 
                                             <td>
-                                                <form action="{{route('url.destroy',$data->id)}}" method="post">
-                                                    @method('DELETE')
-                                                    @csrf
-                                                    <button class="delete-btn" type="submit"
-                                                            data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                                        <i style="color: #eb2549" class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @elseif(Auth::user()->role == 1 && $data->id_project == 1)
-                                        @csrf
-                                        <tr id="row_{{$data->id}}">
-                                            <th scope="row">{{$key+1}}</th>
-                                            <td>
-                                                <a style="color: #2563eb" href="{{$data->url}}" target="_blank">
-                                                    {{$data->name}}
-                                                </a>
-                                            </td>
-                                            <td>{{$data->last_ping}}</td>
-                                            <td>{{$data->time_out}}</td>
-                                            <td>{{$data->status_code}}</td>
-                                            <td>{{$data->max_count_ping}}</td>
-                                            <td>{{$data->created_at}}</td>
-                                            <td>
-                                                <form action="{{route('url.edit',$data->id)}}" method="post">
-                                                    @method('GET')
-                                                    @csrf
-                                                    <button type="submit">
-                                                        <i style="color: #2563eb" class="fas fa-pen"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            <td>
-                                                <button type="submit" onclick="deleteUrl({{$data->id}})">
+                                                <button onclick="deleteUrl({{$data->id}}, '{{$data->name}}')">
                                                     <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                                 </button>
                                             </td>
@@ -197,28 +142,4 @@
 
 
 </x-app-layout>
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal">
-    Launch demo modal
-</button>
 
-<!-- Modal -->
-<div class="modal fade" id="deleteModal"  aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header text-center">
-                <h5 style="color: red" class="modal-title" id="exampleModalLabel">УДАЛЕНИЯ</h5>
-                <button style="color: red" type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Вы действительно хотите удалить?
-            </div>
-            <div class="modal-footer">
-                <button id="btn_no" style="background-color: #6b7280" type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">НЕТ
-                </button>
-                <button id="btn_yes" style="background-color: red" type="button" class="btn btn-primary">ДА</button>
-            </div>
-        </div>
-    </div>
-</div>

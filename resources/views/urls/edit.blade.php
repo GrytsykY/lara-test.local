@@ -1,23 +1,11 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight text-center">
-            {{ __('Редактирование название: '.$urls->name) }}
-            {{--            @foreach($projects as $prod)--}}
-            {{--                @if (Auth::user()->role == 0 && Auth::user()->id_project == $prod->id)--}}
-            {{--                    {{ __($prod->title) }}--}}
-            {{--                @endif--}}
-            {{--            @endforeach--}}
-            {{--            @if(Auth::user()->role == 1)--}}
-            {{--                {{ __('ADMIN') }}--}}
-            {{--            @endif--}}
-        </h2>
-    </x-slot>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="ml-4">
-                        <h1 style="font-size: 20px" class="text-center"><b> Редактирования </b></h1>
+                        <h1 style="font-size: 20px" class="text-center"><b> Редактирование  </b></h1>
                         @if ($message = Session::get('success'))
                             <div class="text-center alert alert-success">
                                 <p>{{ $message }}</p>
@@ -26,37 +14,29 @@
                         <form action="{{route('url.update', $urls->id)}}" method="POST">
                             @csrf
                             @method('PUT')
-
-                            <div id="select_project">
+                            <input name="id_project" type="hidden" value="{{$urls->id_project}}">
+                            @if(Auth::user()->role == 1)
                                 <label for="project">Название проекта</label><br>
                                 <select id="project" name="id_project" class="project control">
 
                                     @foreach($projects as $project)
                                         @php $sel = ""; @endphp
                                         @if($project->id == $urls->id_project) @php $sel = "selected"; @endphp @endif
-                                        @if($project->id == Auth::user()->id_project)
-                                            <option id="{{$project->id}}" {{$sel}} value="{{$project->id}}">
-                                                <a href="{{route('url.ajax-url-form',$project->id)}}">
-                                                    {{$project->title}}</a>
-                                            </option>
-                                        @elseif(Auth::user()->role == 1)
-                                                <option id="{{$project->id}}" value="{{$project->id}}" {{$sel}} >
-                                                    {{$project->title}}
-                                                </option>
-                                        @endif
+                                        <option id="{{$project->id}}" value="{{$project->id}}" {{$sel}} >
+                                            {{$project->title}}
+                                        </option>
                                     @endforeach
                                 </select>
-
-                            </div>
+                            @endif
                             <div>
                                 <label>Введите название</label><br>
-                                <input id="name" name="name" class="control" type="text" value="{{$urls->name}}">
+                                <input id="name" name="name" class="control" type="text" value="{{$urls->name}}" required>
                                 <p id="name_label"></p>
                             </div>
                             <div>
                                 <label id="url_check1">Введите url</label><br>
                                 <input id="url_check" class="control" name="url"
-                                       type="text" value="{{$urls->url}}">
+                                       type="text" value="{{$urls->url}}" required>
                                 <button id="check_url_btn" class="check_url_btn btn btn-primary" type="button"
                                         style="background-color: #2563eb">CHECK
                                 </button>
@@ -110,4 +90,6 @@
             </div>
         </div>
     </div>
+
 </x-app-layout>
+
