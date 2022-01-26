@@ -5,7 +5,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    <div id="error_mes" class="error_mes">
+                    <div id="error_mes">
 
                     </div>
 
@@ -102,7 +102,7 @@
                                 <tbody>
                                 @php $count = 0; @endphp
                                 @foreach($urls as $key=> $data)
-                                    @if((Auth::user()->id_project == $data->id_project))
+{{--                                    @if((Auth::user()->id_project == $data->id_project))--}}
                                         @php $count++; @endphp
 
                                         <tr id="row_{{$data->id}}">
@@ -118,9 +118,14 @@
                                             <td>{{$data->max_count_ping}}</td>
                                             <td>{{$data->created_at}}</td>
                                             <td>
-                                                <button onclick="editUrl({{$data->id}})">
-                                                    <i style="color: #2563eb" class="fas fa-pen"></i>
-                                                </button>
+{{--                                                <button onclick="editUrl({{$data->id}})">--}}
+{{--                                                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
+{{--                                                </button>--}}
+                                                <form action="url/{{$data->id}}/edit" method="get">
+                                                    <button type="submit">
+                                                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                                                    </button>
+                                                </form>
                                             </td>
 
                                             <td>
@@ -129,7 +134,7 @@
                                                 </button>
                                             </td>
                                         </tr>
-                                    @endif
+{{--                                    @endif--}}
                                 @endforeach
                                 </tbody>
                             </table>

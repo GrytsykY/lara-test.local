@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UrlController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Notification;
+use NotificationChannels\Telegram\Telegram;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +36,14 @@ Route::get('url-ping/ping3', [UrlController::class, 'ping3'])->name('ping3');
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+//Route::post('bot/sendmessage', function() {
+//    Telegram::sendMessage([
+//        'chat_id' => '5087265422',
+//        'text' => 'Привет, мир!'
+//    ]);
+//    return;
+//});
 
 //Notification::route('telegram', '5087265422')
 //    ->notify(new \App\Notifications\Telegram);

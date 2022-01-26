@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+
 class UrlController extends Controller
 {
     /**
@@ -27,10 +28,13 @@ class UrlController extends Controller
             $urls = DB::table('urls')->where('id_project','=', $user->id_project)->get();
             $projects = DB::table('projects')->where('id','=', $user->id_project)->get();
         } else {
-            $urls = Url::all();
+            $urls = DB::table('urls')
+                ->orderBy('id_project','asc')
+                ->where('id_project','=', 1)
+                ->get();
             $projects = Project::all();
         }
-//        dd($projects);
+//        dd($urls);
         $alerts = Alert::all();
 
         return view('urls.index', compact('urls', 'projects', 'alerts'));
@@ -267,7 +271,12 @@ class UrlController extends Controller
 
                         $this->updatePingNull($url->id, $current);
                     } else {
-                        //отправляем сообщение false
+
+                        $alert = DB::table('alerts')->where('id','=',$url->id_alert)->get();
+
+                        if ($alert)
+                            $this->tel_curl(5087265422, $url->name.' '.$alert[0]->name.
+                                ' '.$alert[0]->description);
 
                         $update = DB::table('urls')
                             ->where('id', '=', $url->id)
@@ -296,8 +305,6 @@ class UrlController extends Controller
         }
 
         dump($urls);
-
-
     }
 
     public function ping2()
@@ -311,6 +318,8 @@ class UrlController extends Controller
             ->where('is_failed', '=', true)
             ->where('is_sent_alert', '=', false)
             ->get();
+
+
 
 //        $count_ping = DB::table('urls')->pluck('max_count_ping');
 
@@ -348,6 +357,11 @@ class UrlController extends Controller
 
 
                         if ($url->max_count_ping == $url->ping_counter) {
+                            $alert = DB::table('alerts')->where('id','=',$url->id_alert)->get();
+
+                            if ($alert)
+                            $this->tel_curl(5087265422, $url->name.' '.$alert[0]->name.
+                                ' '.$alert[0]->description);
 
                             $update = DB::table('urls')
                                 ->where('id', '=', $url->id)
@@ -395,5 +409,24 @@ class UrlController extends Controller
 
 //        dump($status);
         dump($urls);
+    }
+
+    public function tel_curl($id, $message)
+    {
+        $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
+        $website="https://api.telegram.org/bot".$botToken;
+        $chatId=1234567;  //Receiver Chat Id
+        $params=[
+            'chat_id'=>$id,
+            'text'=> $message,
+        ];
+        $ch = curl_init($website . '/sendMessage');
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $result = curl_exec($ch);
+        curl_close($ch);
     }
 }

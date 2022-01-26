@@ -32,4 +32,5 @@ class Url extends Model
     {
         return $this->hasMany("App\Urls", "id_user", "id");
     }
+
 }

@@ -42,9 +42,14 @@
             <td>{{$data->max_count_ping}}</td>
             <td>{{$data->created_at}}</td>
             <td>
-                <button onclick="editUrl({{$data->id}})">
-                    <i style="color: #2563eb" class="fas fa-pen"></i>
-                </button>
+{{--                <button onclick="editUrl({{$data->id}})">--}}
+{{--                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
+{{--                </button>--}}
+                <form action="url/{{$data->id}}/edit" method="get">
+                    <button type="submit">
+                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                    </button>
+                </form>
             </td>
 
             <td>

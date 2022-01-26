@@ -160,6 +160,7 @@ $(document).ready(function () {
 
         var date_now = getActualFullDate();
 
+        $("#error_mes").removeClass('text-center error_mes alert alert-danger');
         console.log(date_now)
         if (error) return;
         console.log($('meta[name="csrf-token"]').attr('content'));
@@ -186,13 +187,14 @@ $(document).ready(function () {
 
 
                 if (response.error) {
-
+                    $('#error_mes').addClass('text-center error_mes alert alert-danger');
                     for (let i = 0; i < response.error.length; i++) {
                         let ul = document.createElement('ul');
                         let li = document.createElement('li');
                         li.innerHTML = response.error[i];
                         ul.appendChild(li);
                         document.getElementById('error_mes').appendChild(ul);
+
                     }
                     error = true;
                 }
