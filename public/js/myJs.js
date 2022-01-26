@@ -194,7 +194,6 @@ $(document).ready(function () {
                         li.innerHTML = response.error[i];
                         ul.appendChild(li);
                         document.getElementById('error_mes').appendChild(ul);
-
                     }
                     error = true;
                 }

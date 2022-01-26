@@ -25,12 +25,12 @@ class UrlController extends Controller
         $user = \Auth::user();
 
         if ($user->role == 0) {
-            $urls = DB::table('urls')->where('id_project','=', $user->id_project)->get();
-            $projects = DB::table('projects')->where('id','=', $user->id_project)->get();
+            $urls = DB::table('urls')->where('id_project', '=', $user->id_project)->get();
+            $projects = DB::table('projects')->where('id', '=', $user->id_project)->get();
         } else {
             $urls = DB::table('urls')
-                ->orderBy('id_project','asc')
-                ->where('id_project','=', 1)
+                ->orderBy('id_project', 'asc')
+                ->where('id_project', '=', 1)
                 ->get();
             $projects = Project::all();
         }
@@ -99,7 +99,7 @@ class UrlController extends Controller
         $user = \Auth::user();
 
         if ($user->role == 0) {
-            $projects = DB::table('projects')->where('id','=', $user->id_project)->get();
+            $projects = DB::table('projects')->where('id', '=', $user->id_project)->get();
         } else {
             $projects = Project::all();
         }
@@ -143,14 +143,14 @@ class UrlController extends Controller
      * @param \App\Models\Url $urls
      * @return string
      */
-    public function destroy(Url $urls,$id)
+    public function destroy(Url $urls, $id)
     {
 
         $url = Url::find($id);
         if ($url) $url->delete();
 
         $urls = DB::table('urls')
-            ->where('id_project','=',$url->id_project)
+            ->where('id_project', '=', $url->id_project)
             ->get();
 
         return view('ajax.ajaxUrlShow', compact('urls'))->render();
@@ -272,11 +272,11 @@ class UrlController extends Controller
                         $this->updatePingNull($url->id, $current);
                     } else {
 
-                        $alert = DB::table('alerts')->where('id','=',$url->id_alert)->get();
+                        $alert = DB::table('alerts')->where('id', '=', $url->id_alert)->get();
 
                         if ($alert)
-                            $this->tel_curl(5087265422, $url->name.' '.$alert[0]->name.
-                                ' '.$alert[0]->description);
+                            $this->tel_curl(5087265422, $url->name . ' ' . $alert[0]->name .
+                                ' ' . $alert[0]->description);
 
                         $update = DB::table('urls')
                             ->where('id', '=', $url->id)
@@ -320,7 +320,6 @@ class UrlController extends Controller
             ->get();
 
 
-
 //        $count_ping = DB::table('urls')->pluck('max_count_ping');
 
 
@@ -357,11 +356,11 @@ class UrlController extends Controller
 
 
                         if ($url->max_count_ping == $url->ping_counter) {
-                            $alert = DB::table('alerts')->where('id','=',$url->id_alert)->get();
+                            $alert = DB::table('alerts')->where('id', '=', $url->id_alert)->get();
 
                             if ($alert)
-                            $this->tel_curl(5087265422, $url->name.' '.$alert[0]->name.
-                                ' '.$alert[0]->description);
+                                $this->tel_curl(5087265422, $url->name . ' ' . $alert[0]->name .
+                                    ' ' . $alert[0]->description);
 
                             $update = DB::table('urls')
                                 ->where('id', '=', $url->id)
@@ -414,11 +413,11 @@ class UrlController extends Controller
     public function tel_curl($id, $message)
     {
         $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
-        $website="https://api.telegram.org/bot".$botToken;
-        $chatId=1234567;  //Receiver Chat Id
-        $params=[
-            'chat_id'=>$id,
-            'text'=> $message,
+        $website = "https://api.telegram.org/bot" . $botToken;
+        $chatId = 1234567;  //Receiver Chat Id
+        $params = [
+            'chat_id' => $id,
+            'text' => $message,
         ];
         $ch = curl_init($website . '/sendMessage');
         curl_setopt($ch, CURLOPT_HEADER, false);

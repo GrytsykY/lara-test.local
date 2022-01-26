@@ -34,5 +34,6 @@ class UrlRequest extends FormRequest
             'id_user' => 'required|integer|exists:users,id',
             'id_project' => 'required|integer|exists:projects,id',
         ];
+
     }
 }
