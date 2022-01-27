@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+
 class UrlRequest extends FormRequest
 {
     /**
@@ -13,14 +14,13 @@ class UrlRequest extends FormRequest
      */
     public function authorize()
     {
-        return  auth()->check();
-//        return true;
+//        return  auth()->check();
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
      */
     public function rules(): array
     {
@@ -36,4 +36,5 @@ class UrlRequest extends FormRequest
         ];
 
     }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UrlRequest;
 use App\Models\Alert;
 use App\Models\Project;
 use App\Models\Url;
@@ -9,7 +10,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 
 class UrlController extends Controller
@@ -17,7 +17,6 @@ class UrlController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Contracts\Foundation\Application
      */
     public function index()
     {
@@ -41,60 +40,24 @@ class UrlController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(UrlRequest $request): \Illuminate\Http\JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'url' => 'required|max:2048',
-            'name' => 'required|string|min:3',
-            'time_out' => 'required|integer|max:60',
-            'max_count_ping' => 'required|integer',
-            'status_code' => 'required|integer|min:200|max:500',
-            'id_alert' => 'required|integer|exists:alerts,id',
-            'id_user' => 'required|integer|exists:users,id',
-            'id_project' => 'required|integer|exists:projects,id',
-        ]);
-        if (!$validator->passes()) {
-            return response()->json(['error' => $validator->errors()->all()]);
-        }
-        $url = new Url($validator->validated());
+        $url = new Url($request->validated());
         $url->save();
         return response()->json(['data' => $url]);
-//        return redirect()->route('url.index')->with('success','Post created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Url $urls
-     * @return \Illuminate\Contracts\Foundation\Application
-     */
-    public function show(Url $urls, $id)
-    {
-
-    }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param \App\Models\Url $urls
+     * @param $id
      * @return string
      */
-    public function edit(Url $urls, $id): string
+    public function edit($id): string
     {
         $user = \Auth::user();
 
@@ -112,26 +75,12 @@ class UrlController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Url $urls
+     * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Url $urls, $id)
+    public function update(UrlRequest $request, $id): \Illuminate\Http\RedirectResponse
     {
         $urls = Url::find($id);
-
-
-        $request->validate([
-            'url' => 'required|max:2048',
-            'name' => 'required|string|min:3',
-            'time_out' => 'required|integer|max:60',
-            'status_code' => 'required|integer|min:200|max:500',
-            'max_count_ping' => 'required|integer|min:1|max:50',
-            'id_alert' => 'required|integer|exists:alerts,id',
-            'id_project' => 'required|integer|exists:projects,id',
-        ]);
-
-
         $urls->update($request->all());
 
         return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
@@ -140,10 +89,9 @@ class UrlController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Models\Url $urls
      * @return string
      */
-    public function destroy(Url $urls, $id)
+    public function destroy($id): string
     {
 
         $url = Url::find($id);
@@ -170,6 +118,7 @@ class UrlController extends Controller
             return view('ajax.ajaxUrlShow', compact('urls'))->render();
         }
     }
+
 
     public function curl($url)
     {
@@ -228,7 +177,7 @@ class UrlController extends Controller
 
     public function updatePingNull($id, $current)
     {
-        $update = DB::table('urls')
+         DB::table('urls')
             ->where('id', '=', $id)
             ->update([
                 'is_failed' => 0,
@@ -240,7 +189,6 @@ class UrlController extends Controller
 
     public function ping1()
     {
-//        $status = $this->curl();
 
         $current = Carbon::now();
         $current->format('Y-m-d H:i:s');
@@ -251,11 +199,11 @@ class UrlController extends Controller
             ->get();
 
 //        $count_ping = DB::table('urls')->pluck('max_count_ping');
-
+        dump($urls);
         foreach ($urls as $url) {
 
             $status = $this->curl($url->url);
-            dump($status);
+            dump($url->url . ' ' . $status);
             if ($status == $url->status_code) {
                 // отправляем сообщение
 
@@ -273,14 +221,16 @@ class UrlController extends Controller
                     } else {
 
                         $alert = DB::table('alerts')->where('id', '=', $url->id_alert)->get();
+                        $project = DB::table('projects')->where('id', '=', $url->id_project)->get();
 
-                        if ($alert)
-                            $this->tel_curl(5087265422, $url->name . ' ' . $alert[0]->name .
+                        if ($project)
+                            $this->tel_curl($project[0]->chat_id, $url->name . ' ' . $alert[0]->name .
                                 ' ' . $alert[0]->description);
 
-                        $update = DB::table('urls')
+                        DB::table('urls')
                             ->where('id', '=', $url->id)
                             ->update([
+                                'ping_counter' => $url->ping_counter + 1,
                                 'is_failed' => 1,
                                 'is_sent_alert' => 1,
                                 'last_ping' => $current
@@ -292,7 +242,7 @@ class UrlController extends Controller
                         dump(' alert');
                     }
 
-                    $update = DB::table('urls')
+                    DB::table('urls')
                         ->where('id', '=', $url->id)
                         ->update([
                             'ping_counter' => $url->ping_counter + 1,
@@ -304,7 +254,7 @@ class UrlController extends Controller
 
         }
 
-        dump($urls);
+
     }
 
     public function ping2()
@@ -340,13 +290,15 @@ class UrlController extends Controller
 
                     if ($status == $url->status_code) {
 
-                        //отправляем сообщение true
+                        $project = DB::table('projects')->where('id', '=', $url->id_project)->get();
+                        if ($project)
+                            $this->tel_curl($project[0]->chat_id, 'Сайт работает');
 
                         $this->updatePingNull($url->id, $current);
 
                     } else {
 
-                        $update = DB::table('urls')
+                        DB::table('urls')
                             ->where('id', '=', $url->id)
                             ->update([
                                 'ping_counter' => $url->ping_counter + 1,
@@ -355,14 +307,14 @@ class UrlController extends Controller
                             ]);
 
 
-                        if ($url->max_count_ping == $url->ping_counter) {
+                        if ($url->max_count_ping == $url->ping_counter + 1) {
                             $alert = DB::table('alerts')->where('id', '=', $url->id_alert)->get();
-
-                            if ($alert)
-                                $this->tel_curl(5087265422, $url->name . ' ' . $alert[0]->name .
+                            $project = DB::table('projects')->where('id', '=', $url->id_project)->get();
+                            if ($project)
+                                $this->tel_curl($project[0]->chat_id, $url->name . ' ' . $alert[0]->name .
                                     ' ' . $alert[0]->description);
 
-                            $update = DB::table('urls')
+                            DB::table('urls')
                                 ->where('id', '=', $url->id)
                                 ->update([
                                     'is_failed' => 1,
@@ -386,27 +338,26 @@ class UrlController extends Controller
 
         $urls = DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
-            ->where('is_failed', '=', true)
-            ->where('is_sent_alert', '=', true)
+            ->where('is_failed', '=', 1)
+            ->where('is_sent_alert', '=', 1)
             ->get();
-
+        dump($urls);
         foreach ($urls as $url) {
 
             $status = $this->curl($url->url);
 
             if ($status == $url->status_code) {
-                // отправляем сообщение
+                $project = DB::table('projects')->where('id', '=', $url->id_project)->get();
+                if ($project)
+                    $this->tel_curl($project[0]->chat_id, 'Сайт работает');
 
                 $this->updatePingNull($url->id, $current);
 
             }
 
-            dump($url->url);
-        }
-//yuri_test_laravel_bot
-//TELEGRAM_BOT_TOKEN =5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck
 
-//        dump($status);
+        }
+
         dump($urls);
     }
 
@@ -414,7 +365,6 @@ class UrlController extends Controller
     {
         $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
         $website = "https://api.telegram.org/bot" . $botToken;
-        $chatId = 1234567;  //Receiver Chat Id
         $params = [
             'chat_id' => $id,
             'text' => $message,
@@ -429,3 +379,4 @@ class UrlController extends Controller
         curl_close($ch);
     }
 }
+//https://habr.com/ru/post/350778/

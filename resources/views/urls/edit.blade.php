@@ -44,7 +44,7 @@
                                 <p id="url_status"></p>
                             </div>
 
-
+                            <input id="id_user" name="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
                             <div>
                                 <label id="code">Введите код ответа</label><br>
                                 <input id="status_code" class="status_code control" type="number" min="200" max="510"

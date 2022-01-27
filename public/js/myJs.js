@@ -98,10 +98,10 @@ $(document).ready(function () {
 
         if (id_project == undefined) id_project = id_proj;
 
-        console.log(id_project)
-        console.log(time)
-        console.log(name)
-        console.log(status_code)
+        // console.log(id_project)
+        // console.log(time)
+        // console.log(name)
+        // console.log(status_code)
         $(".error").remove();
         // $(".alert alert-danger").remove();
 
@@ -128,10 +128,10 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (time.length < 1) {
-            $('#time_label').after('<span class="error">Введите время</span>');
-            error = true;
-        }
+        // if (time.length < 1) {
+        //     $('#time_label').after('<span class="error">Введите время</span>');
+        //     error = true;
+        // }
 
         if (time < 0) {
             $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
@@ -161,9 +161,9 @@ $(document).ready(function () {
         var date_now = getActualFullDate();
 
         $("#error_mes").removeClass('text-center error_mes alert alert-danger');
-        console.log(date_now)
+
         if (error) return;
-        console.log($('meta[name="csrf-token"]').attr('content'));
+
         $.ajax({
             url: URI + "url",
             type: "POST",
@@ -182,21 +182,9 @@ $(document).ready(function () {
             },
 
             success: function (response) {
-                console.log(response);
+                console.log('SUCCESS ' + response);
+
                 const data = response.data
-
-
-                if (response.error) {
-                    $('#error_mes').addClass('text-center error_mes alert alert-danger');
-                    for (let i = 0; i < response.error.length; i++) {
-                        let ul = document.createElement('ul');
-                        let li = document.createElement('li');
-                        li.innerHTML = response.error[i];
-                        ul.appendChild(li);
-                        document.getElementById('error_mes').appendChild(ul);
-                    }
-                    error = true;
-                }
 
                 if (data) {
 
@@ -208,7 +196,7 @@ $(document).ready(function () {
                             <td>${data.time_out}</td>
                             <td>${data.status_code}</td>
                             <td>${data.max_count_ping}</td>
-                            <td>${date_now}</td>
+
                             <td>
                                 <form action="url/${data.id}/edit" method="get">
                                     <button type="submit">
@@ -231,10 +219,24 @@ $(document).ready(function () {
                     $("#count_link").val("");
                 }
 
+            },
+            error: function (data) {
+
+                let errors = data.responseJSON.errors;
+
+                $('#error_mes').addClass('text-center error_mes alert alert-danger');
+                for (let value of Object.values(errors)) {
+                    let ul = document.createElement('ul');
+                    let li = document.createElement('li');
+                    li.innerHTML = value[0];
+                    ul.appendChild(li);
+                    document.getElementById('error_mes').appendChild(ul);
+
+                }
             }
         });
         document.getElementById('error_mes').innerHTML = "";
-        console.log('ERROR ' + error)
+
 
     });
 

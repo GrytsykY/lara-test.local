@@ -40,7 +40,6 @@
             <td>{{$data->time_out}}</td>
             <td>{{$data->status_code}}</td>
             <td>{{$data->max_count_ping}}</td>
-            <td>{{$data->created_at}}</td>
             <td>
 {{--                <button onclick="editUrl({{$data->id}})">--}}
 {{--                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}

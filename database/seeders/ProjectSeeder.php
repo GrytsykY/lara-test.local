@@ -20,7 +20,7 @@ class ProjectSeeder extends Seeder
         for ($i = 1; $i < 4; $i++) {
             $project = new Project([
                 'title' => 'project_' . $i,
-                'id_chat' => $alerts[rand(0, count($alerts) - 1)]['id']
+                'chat_id' => '5087265422'
             ]);
 
             $project->save();

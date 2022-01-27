@@ -16,8 +16,7 @@ class CreateProjectsTable extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->string('title')->unique();
-            $table->unsignedSmallInteger('id_chat');
-            $table->foreign('id_chat')->references('id')->on('alerts');
+            $table->string('chat_id',60);
             $table->timestamps();
         });
     }

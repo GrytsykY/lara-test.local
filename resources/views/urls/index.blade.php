@@ -94,7 +94,6 @@
                                     <th scope="col">Time</th>
                                     <th scope="col">Code</th>
                                     <th scope="col">Max ping</th>
-                                    <th scope="col">Date</th>
                                     <th></th>
                                     <th></th>
                                 </tr>
@@ -116,7 +115,6 @@
                                             <td>{{$data->time_out}}</td>
                                             <td>{{$data->status_code}}</td>
                                             <td>{{$data->max_count_ping}}</td>
-                                            <td>{{$data->created_at}}</td>
                                             <td>
 {{--                                                <button onclick="editUrl({{$data->id}})">--}}
 {{--                                                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
