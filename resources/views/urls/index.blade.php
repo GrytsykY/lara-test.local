@@ -18,12 +18,13 @@
                             @if(Auth::user()->role == 1)
                                 <div id="select_project">
                                     <label for="project">Название проекта</label><br>
+                                    @dd($urls)
                                     <select id="project" class="project control">
                                         @foreach($projects as $project)
                                             @php $sel = ""; @endphp
 
-                                            <option id="{{$project->id}}" {{$sel}}>
-                                                {{$project->title}}
+                                            <option id="{{$project['id']}}" {{$sel}}>
+                                                {{$project['title']}}
                                             </option>
 
                                         @endforeach
