@@ -11,16 +11,17 @@
 
                     <div class="row">
                         @if(Auth::user()->role == 0)
-                            <h2 style="font-size: 24px" class="text-center"><b>{{ __($projects[0]->title) }}</b></h2>
-                            <input id="id_project_input" type="hidden" value="{{$projects[0]->id}}">
+{{--                            @dd($urls['projects'])--}}
+                            <h2 style="font-size: 24px" class="text-center"><b>{{ __($urls['projects'][0]['title']) }}</b></h2>
+                            <input id="id_project_input" type="hidden" value="{{$urls['projects'][0]['id']}}">
                         @endif
                         <div class="col-5">
                             @if(Auth::user()->role == 1)
                                 <div id="select_project">
                                     <label for="project">Название проекта</label><br>
-                                    @dd($urls)
+{{--                                    @dd($urls)--}}
                                     <select id="project" class="project control">
-                                        @foreach($projects as $project)
+                                        @foreach($urls['projects'] as $project)
                                             @php $sel = ""; @endphp
 
                                             <option id="{{$project['id']}}" {{$sel}}>
@@ -70,12 +71,12 @@
                             <br>
 
 
-                            @foreach($alerts as $alert)
+                            @foreach($urls['alerts'] as $alert)
 
-                                <input type="radio" class="btn-check" name="radio" id="{{$alert->class}}-outlined"
-                                       autocomplete="off" value="{{$alert->id}}">
-                                <label class="btn btn-outline-{{$alert->class}}"
-                                       for="{{$alert->class}}-outlined">{{$alert->name}}</label>
+                                <input type="radio" class="btn-check" name="radio" id="{{$alert['class']}}-outlined"
+                                       autocomplete="off" value="{{$alert['id']}}">
+                                <label class="btn btn-outline-{{$alert['class']}}"
+                                       for="{{$alert['class']}}-outlined">{{$alert['name']}}</label>
 
                             @endforeach
                             <p id="radio_label"></p>
@@ -101,26 +102,26 @@
                                 </thead>
                                 <tbody>
                                 @php $count = 0; @endphp
-                                @foreach($urls as $key=> $data)
+                                @foreach($urls['urls'] as $key=> $data)
 {{--                                    @if((Auth::user()->id_project == $data->id_project))--}}
                                         @php $count++; @endphp
 
-                                        <tr id="row_{{$data->id}}">
+                                        <tr id="row_{{$data['id']}}">
                                             <th scope="row">{{$count}}</th>
                                             <td>
-                                                <a style="color: #2563eb" href="{{$data->url}}" target="_blank">
-                                                    {{$data->name}}
+                                                <a style="color: #2563eb" href="{{$data['url']}}" target="_blank">
+                                                    {{$data['name']}}
                                                 </a>
                                             </td>
-                                            <td>{{$data->last_ping}}</td>
-                                            <td>{{$data->time_out}}</td>
-                                            <td>{{$data->status_code}}</td>
-                                            <td>{{$data->max_count_ping}}</td>
+                                            <td>{{$data['last_ping']}}</td>
+                                            <td>{{$data['time_out']}}</td>
+                                            <td>{{$data['status_code']}}</td>
+                                            <td>{{$data['max_count_ping']}}</td>
                                             <td>
 {{--                                                <button onclick="editUrl({{$data->id}})">--}}
 {{--                                                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
 {{--                                                </button>--}}
-                                                <form action="url/{{$data->id}}/edit" method="get">
+                                                <form action="url/{{$data['id']}}/edit" method="get">
                                                     <button type="submit">
                                                         <i style="color: #2563eb" class="fas fa-pen"></i>
                                                     </button>
@@ -128,7 +129,7 @@
                                             </td>
 
                                             <td>
-                                                <button onclick="deleteUrl({{$data->id}}, '{{$data->name}}')">
+                                                <button onclick="deleteUrl({{$data['id']}}, '{{$data['name']}}')">
                                                     <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                                 </button>
                                             </td>

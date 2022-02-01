@@ -11,32 +11,41 @@
                                 <p>{{ $message }}</p>
                             </div>
                         @endif
-                        <form action="{{route('url.update', $urls->id)}}" method="POST">
+                        @if ($errors->any())
+                            <div class="alert alert-danger text-center">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <form action="{{route('url.update', $urls['urls']['id'])}}" method="POST">
                             @csrf
                             @method('PUT')
-                            <input name="id_project" type="hidden" value="{{$urls->id_project}}">
+                            <input name="id_project" type="hidden" value="{{$urls['urls']['id_project']}}">
                             @if(Auth::user()->role == 1)
                                 <label for="project">Название проекта</label><br>
                                 <select id="project" name="id_project" class="project control">
 
-                                    @foreach($projects as $project)
+                                    @foreach($urls['projects'] as $project)
                                         @php $sel = ""; @endphp
-                                        @if($project->id == $urls->id_project) @php $sel = "selected"; @endphp @endif
-                                        <option id="{{$project->id}}" value="{{$project->id}}" {{$sel}} >
-                                            {{$project->title}}
+                                        @if($project['id'] == $urls['urls']['id']) @php $sel = "selected"; @endphp @endif
+                                        <option id="{{$project['id']}}" value="{{$project['id']}}" {{$sel}} >
+                                            {{$project['title']}}
                                         </option>
                                     @endforeach
                                 </select>
                             @endif
                             <div>
                                 <label>Введите название</label><br>
-                                <input id="name" name="name" class="control" type="text" value="{{$urls->name}}" required>
+                                <input id="name" name="name" class="control" type="text" value="{{$urls['urls']['name']}}" required>
                                 <p id="name_label"></p>
                             </div>
                             <div>
                                 <label id="url_check1">Введите url</label><br>
                                 <input id="url_check" class="control" name="url"
-                                       type="text" value="{{$urls->url}}" required>
+                                       type="text" value="{{$urls['urls']['url']}}" required>
                                 <button id="check_url_btn" class="check_url_btn btn btn-primary" type="button"
                                         style="background-color: #2563eb">CHECK
                                 </button>
@@ -48,14 +57,14 @@
                             <div>
                                 <label id="code">Введите код ответа</label><br>
                                 <input id="status_code" class="status_code control" type="number" min="200" max="510"
-                                       name="status_code" value="{{$urls->status_code}}" required>
+                                       name="status_code" value="{{$urls['urls']['status_code']}}" required>
                                 <p id="code_label"></p>
                             </div>
 
                             <div>
                                 <label id="time1">Введите время</label><br>
                                 <input id="time" class="control" type="number" min="1" max="40"
-                                       name="time_out" value="{{$urls->time_out}}"
+                                       name="time_out" value="{{$urls['urls']['time_out']}}"
                                        required>
                                 <p id="time_label"></p>
                             </div>
@@ -63,19 +72,19 @@
                             <div>
                                 <label id="count">Введите кол-запросов</label><br>
                                 <input id="count_link" class="control" type="number" min="1" max="40"
-                                       name="max_count_ping" value="{{$urls->max_count_ping}}" required>
+                                       name="max_count_ping" value="{{$urls['urls']['max_count_ping']}}" required>
                                 <p id="count_label"></p>
                             </div>
                             <br>
 
 
-                            @foreach($alerts as $alert)
+                            @foreach($urls['alerts'] as $alert)
                                 @php $checked = ""; @endphp
-                                @if($alert->id == $urls->id_alert) @php $checked = "checked"; @endphp @endif
-                                <input type="radio" class="btn-check" name="id_alert" id="{{$alert->class}}-outlined"
-                                       autocomplete="off" value="{{$alert->id}}" {{$checked}}>
-                                <label class="btn btn-outline-{{$alert->class}}"
-                                       for="{{$alert->class}}-outlined">{{$alert->name}}</label>
+                                @if($alert['id'] == $urls['urls']['id_alert']) @php $checked = "checked"; @endphp @endif
+                                <input type="radio" class="btn-check" name="id_alert" id="{{$alert['class']}}-outlined"
+                                       autocomplete="off" value="{{$alert['id']}}" {{$checked}}>
+                                <label class="btn btn-outline-{{$alert['class']}}"
+                                       for="{{$alert['class']}}-outlined">{{$alert['name']}}</label>
                             @endforeach
                             <p id="radio_label"></p>
                             <br><br>

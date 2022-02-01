@@ -25,26 +25,27 @@
     </thead>
     <tbody>
     @php $count = 0; @endphp
+{{--    @dd($urls)--}}
     @foreach($urls as $key=> $data)
         {{--        @if(Auth::user()->id_project == $data->id_project)--}}
         @php $count++; @endphp
 
-        <tr id="row_{{$data->id}}">
+        <tr id="row_{{$data['id']}}">
             <th scope="row">{{$count}}</th>
             <td>
-                <a style="color: #2563eb" href="{{$data->url}}" target="_blank">
-                    {{$data->name}}
+                <a style="color: #2563eb" href="{{$data['url']}}" target="_blank">
+                    {{$data['name']}}
                 </a>
             </td>
-            <td>{{$data->last_ping}}</td>
-            <td>{{$data->time_out}}</td>
-            <td>{{$data->status_code}}</td>
-            <td>{{$data->max_count_ping}}</td>
+            <td>{{$data['last_ping']}}</td>
+            <td>{{$data['time_out']}}</td>
+            <td>{{$data['status_code']}}</td>
+            <td>{{$data['max_count_ping']}}</td>
             <td>
 {{--                <button onclick="editUrl({{$data->id}})">--}}
 {{--                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
 {{--                </button>--}}
-                <form action="url/{{$data->id}}/edit" method="get">
+                <form action="url/{{$data['id']}}/edit" method="get">
                     <button type="submit">
                         <i style="color: #2563eb" class="fas fa-pen"></i>
                     </button>
@@ -52,7 +53,7 @@
             </td>
 
             <td>
-                <button type="button" onclick="deleteUrl({{$data->id}}, '{{$data->name}}')">
+                <button type="button" onclick="deleteUrl({{$data['id']}}, '{{$data['name']}}')">
                     <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                 </button>
             </td>
