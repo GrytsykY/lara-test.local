@@ -14,6 +14,7 @@ class Url extends Model
     protected $fillable = [
         'url',
         'name',
+        'search_word',
         'time_out',
         'max_count_ping',
         'ping_counter',

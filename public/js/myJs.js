@@ -89,6 +89,7 @@ $(document).ready(function () {
         let url_check = $('#url_check').val();
         let time = $('#time').val();
         let name = $('#name').val();
+        let search_word = $('#search_word').val();
         let id_user = $('#id_user').val();
         let status_code = $('#status_code').val();
         let count_link = $('#count_link').val();
@@ -98,7 +99,7 @@ $(document).ready(function () {
 
         if (id_project == undefined) id_project = id_proj;
 
-        // console.log(id_project)
+        console.log(search_word)
         // console.log(time)
         // console.log(name)
         // console.log(status_code)
@@ -120,6 +121,11 @@ $(document).ready(function () {
 
         if (name.length < 1) {
             $('#name_label').after('<span class="error">Введите название</span>');
+            error = true;
+        }
+
+        if (name.length < 1) {
+            $('#search_label').after('<span class="error">Введите слово или фразу</span>');
             error = true;
         }
 
@@ -173,6 +179,7 @@ $(document).ready(function () {
             data: {
                 url: url_check,
                 name: name,
+                search_word: search_word,
                 time_out: time,
                 max_count_ping: count_link,
                 status_code: status_code,
@@ -214,6 +221,7 @@ $(document).ready(function () {
                 if (!error) {
                     $("#time").val("");
                     $("#name").val("");
+                    $("#search_word").val("");
                     $("#url_check").val("");
                     $("#status_code").val("");
                     $("#count_link").val("");

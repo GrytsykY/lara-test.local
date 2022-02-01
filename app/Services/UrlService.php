@@ -96,48 +96,6 @@ class UrlService extends BaseService
         return $this->urlRepository->ajaxUrlShowTable($id);
     }
 
-    public function curl($url)
-    {
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json;charset=utf-8'));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        $response = curl_exec($ch);
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-
-        return $status;
-    }
-
-    protected function tel_curl($id, $message)
-    {
-        $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
-        $website = "https://api.telegram.org/bot" . $botToken;
-        $params = [
-            'chat_id' => $id,
-            'text' => $message,
-        ];
-        $ch = curl_init($website . '/sendMessage');
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $result = curl_exec($ch);
-        curl_close($ch);
-    }
-
-    protected function dateNow(): Carbon
-    {
-        $current = Carbon::now();
-        $current->format('Y-m-d H:i:s');
-        return $current;
-    }
-
     public function ping1()
     {
         $urls = $this->pingRepository->getTimeOutAndLastPing($this->dateNow());
@@ -162,15 +120,7 @@ class UrlService extends BaseService
                         $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
                     } else {
 
-                        $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
-
-                        $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
-
-                        if ($project)
-                            $this->tel_curl($project[0]['chat_id'], $url['name'] . ' ' . $alert[0]['name'] .
-                                ' ' . $alert[0]['description']);
-
-                        $this->pingRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+                        $this->answerAlertIsNot($url);
                     }
                 } else {
 
@@ -191,7 +141,8 @@ class UrlService extends BaseService
             $status = $this->curl($url['url']);
             dump($status);
             if ($status == $url['status_code']) {
-                // отправляем сообщение
+
+                $this->answerAlertIsOk($url);
 
                 $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
 
@@ -203,24 +154,14 @@ class UrlService extends BaseService
 
                     if ($status == $url['status_code']) {
 
-                        $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
-                        if ($project)
-                            $this->tel_curl($project[0]['chat_id'], 'Сайт работает');
-
-                        $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+                        $this->answerAlertIsOk($url);
 
                     } else {
 
                         $this->pingRepository->updatePingCounterFieldOne($url, $this->dateNow());
 
                         if ($url['max_count_ping'] == $url['ping_counter'] + 1) {
-                            $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
-                            $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
-                            if ($project)
-                                $this->tel_curl($project[0]['chat_id'], $url['name'] . ' ' . $alert[0]['name'] .
-                                    ' ' . $alert[0]['description']);
-
-                            $this->pingRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+                            $this->answerAlertIsNot($url);
                         }
                     }
                 }
@@ -241,11 +182,8 @@ class UrlService extends BaseService
             $status = $this->curl($url['url']);
 
             if ($status == $url['status_code']) {
-                $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
-                if ($project)
-                    $this->tel_curl($project[0]['chat_id'], 'Сайт работает');
 
-                $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+                $this->answerAlertIsOk($url);
 
             }
 
@@ -253,5 +191,74 @@ class UrlService extends BaseService
 
     }
 
+    public function curl($url, $params = [])
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        if (!empty($params)) {
+            curl_setopt($ch, CURLOPT_HEADER, false);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, ($params));
+        }
+        $response = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
+        return $status;
+    }
+
+    protected function tel_curl($id, $message)
+    {
+        $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
+        $website = "https://api.telegram.org/bot" . $botToken;
+        $url = $website . '/sendMessage';
+        $params = [
+            'chat_id' => $id,
+            'text' => $message,
+        ];
+
+        $this->curl($url, $params);
+    }
+
+    protected function dateNow(): Carbon
+    {
+        $current = Carbon::now();
+        $current->format('Y-m-d H:i:s');
+        return $current;
+    }
+
+    /**
+     * @param mixed $url
+     */
+    public function answerAlertIsOk(mixed $url): void
+    {
+        if (strpos(file_get_contents($url['url']), $url['search_word']))
+            $text = "Есть такое слово: " . $url['search_word'];
+        else
+            $text = "Нет такого слова (или текста): " . $url['search_word'];
+
+        $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
+        if ($project)
+            $this->tel_curl($project[0]['chat_id'], 'Сайт работает! ' . $text);
+
+        $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+
+    }
+
+    /**
+     * @param mixed $url
+     */
+    public function answerAlertIsNot(mixed $url): void
+    {
+        $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
+        $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
+        if ($project)
+            $this->tel_curl($project[0]['chat_id'], $url['name'] . ' ' . $alert[0]['name'] .
+                ' ' . $alert[0]['description']);
+
+        $this->pingRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+    }
 }

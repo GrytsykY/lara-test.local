@@ -43,6 +43,11 @@
                                 <p id="name_label"></p>
                             </div>
                             <div>
+                                <label>Введите для поиска слово</label><br>
+                                <input id="search_word" name="search_word" class="control" type="text" value="{{$urls['urls']['search_word']}}">
+                                <p id="search_label"></p>
+                            </div>
+                            <div>
                                 <label id="url_check1">Введите url</label><br>
                                 <input id="url_check" class="control" name="url"
                                        type="text" value="{{$urls['urls']['url']}}" required>

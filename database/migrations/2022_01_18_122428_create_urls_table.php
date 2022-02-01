@@ -17,6 +17,7 @@ class CreateUrlsTable extends Migration
             $table->smallIncrements('id');
             $table->string('url', 2048);
             $table->string('name', 30);
+            $table->string('search_word', 130);
             $table->unsignedTinyInteger('time_out');
             $table->smallInteger('max_count_ping');
             $table->tinyInteger('ping_counter')->default(0);

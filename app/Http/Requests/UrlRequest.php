@@ -29,6 +29,7 @@ class UrlRequest extends FormRequest
         return [
             'url' => 'required|max:2048',
             'name' => 'required|string|min:3',
+            'search_word' => 'required|string|min:3',
             'time_out' => 'required|integer|max:60',
             'max_count_ping' => 'required|integer',
             'status_code' => 'required|integer|min:200|max:500',
