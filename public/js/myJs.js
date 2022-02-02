@@ -42,8 +42,7 @@ $(document).ready(function () {
                 }
 
             });
-            // if (!error) $('#url_check').val('');
-            $('#status_code').val('');
+
         });
     }
 
@@ -129,15 +128,15 @@ $(document).ready(function () {
             error = true;
         }
 
-        if (choice == undefined) {
+        if (choice === undefined) {
             $('#radio_label').after('<span class="error">Выберите кнопку</span>');
             error = true;
         }
 
-        // if (time.length < 1) {
-        //     $('#time_label').after('<span class="error">Введите время</span>');
-        //     error = true;
-        // }
+        if (time.length < 1) {
+            $('#time_label').after('<span class="error">Введите время</span>');
+            error = true;
+        }
 
         if (time < 0) {
             $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
@@ -228,18 +227,20 @@ $(document).ready(function () {
                 }
 
             },
-            error: function (data) {
+            error: function (error) {
 
-                let errors = data.responseJSON.errors;
+                let errors = error.responseJSON.errors;
+                console.log(errors)
+                if (errors) {
+                    $('#error_mes').addClass('text-center error_mes alert alert-danger');
+                    for (let value of Object.values(errors)) {
+                        let ul = document.createElement('ul');
+                        let li = document.createElement('li');
+                        li.innerHTML = value[0];
+                        ul.appendChild(li);
+                        document.getElementById('error_mes').appendChild(ul);
 
-                $('#error_mes').addClass('text-center error_mes alert alert-danger');
-                for (let value of Object.values(errors)) {
-                    let ul = document.createElement('ul');
-                    let li = document.createElement('li');
-                    li.innerHTML = value[0];
-                    ul.appendChild(li);
-                    document.getElementById('error_mes').appendChild(ul);
-
+                    }
                 }
             }
         });
@@ -315,98 +316,6 @@ function editUrl(id) {
     });
 }
 
-function updateButton(id) {
-
-    let url_check = $('#url_check').val();
-    let time = $('#time').val();
-    let name = $('#name').val();
-    let status_code = $('#status_code').val();
-    let count_link = $('#count_link').val();
-    let id_project = $('#project option:selected').attr('id');
-    let choice = $('input[name="id_alert"]:checked').val();
-    let id_proj = $('#id_project').val();
-
-    if (id_project == undefined) id_project = id_proj;
-
-    var error = false;
-
-    if (url_check.length < 1) {
-        $('#url_label').after('<span class="error">Введите url</span>');
-        error = true;
-    }
-
-    var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-
-    if (res == null && !error) {
-        $('#url_label').after('<span class="error">Неверный url адрес</span>');
-        error = true;
-    }
-
-    if (name.length < 1) {
-        $('#name_label').after('<span class="error">Введите название</span>');
-        error = true;
-    }
-
-    if (choice == undefined) {
-        $('#radio_label').after('<span class="error">Выберите кнопку</span>');
-        error = true;
-    }
-
-    if (time.length < 1) {
-        $('#time_label').after('<span class="error">Введите время</span>');
-        error = true;
-    }
-
-    if (time < 0) {
-        $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
-        error = true;
-    }
-
-    if (time > 40) {
-        $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
-        error = true;
-    }
-
-    if (status_code.length < 1) {
-        $('#code_label').after('<span class="error">Введите код</span>');
-        error = true;
-    }
-
-    if (status_code < 200 || status_code > 500) {
-        $('#code_label').after('<span class="error">Не верный код</span>');
-        error = true;
-    }
-
-    if (count_link.length < 1) {
-        $('#count_label').after('<span class="error">Введите колличество запросов</span>');
-        error = true;
-    }
-
-    if (error) return;
-
-    $.ajax({
-        url: 'url/' + id,
-        type: "POST",
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-        },
-        data: {
-            _method: 'PUT',
-            url: url_check,
-            name: name,
-            time_out: time,
-            max_count_ping: count_link,
-            status_code: status_code,
-            id_alert: choice,
-            id_project: id_project,
-        },
-        success: function (data) {
-            $('.py-12').html(data);
-            console.log(data)
-        }
-    });
-}
-
 function addZero(i) {
     if (i < 10) {
         i = "0" + i;
@@ -415,18 +324,14 @@ function addZero(i) {
 }
 
 function getActualFullDate() {
-    var d = new Date();
-    var day = addZero(d.getDate());
-    var month = addZero(d.getMonth() + 1);
-    var year = addZero(d.getFullYear());
-    var h = addZero(d.getHours());
-    var m = addZero(d.getMinutes());
-    var s = addZero(d.getSeconds());
+    let d = new Date();
+    let day = addZero(d.getDate());
+    let month = addZero(d.getMonth() + 1);
+    let year = addZero(d.getFullYear());
+    let h = addZero(d.getHours());
+    let m = addZero(d.getMinutes());
+    let s = addZero(d.getSeconds());
     return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
 }
 
-// $('.btn_del').click(function (r){
-//     r.preventDefault();
-//     deleteUrl(this.dataset.id);
-// });
 

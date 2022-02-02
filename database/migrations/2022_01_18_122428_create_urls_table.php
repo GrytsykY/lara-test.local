@@ -32,6 +32,7 @@ class CreateUrlsTable extends Migration
             $table->foreign('id_alert')->references('id')->on('alerts');
             $table->foreign('id_project')->references('id')->on('projects');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
