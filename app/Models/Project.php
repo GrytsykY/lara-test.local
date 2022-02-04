@@ -14,11 +14,10 @@ class Project extends Model
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'title',
-        'id_alert',
-        'created_at'
+        'id_alert'
     ];
 }

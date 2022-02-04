@@ -16,8 +16,8 @@ class CreateUrlsTable extends Migration
         Schema::create('urls', function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->string('url', 2048);
-            $table->string('name', 30);
-            $table->string('search_word', 130);
+            $table->string('title', 30);
+            $table->string('search_term', 130)->nullable();
             $table->unsignedTinyInteger('time_out');
             $table->smallInteger('max_count_ping');
             $table->tinyInteger('ping_counter')->default(0);

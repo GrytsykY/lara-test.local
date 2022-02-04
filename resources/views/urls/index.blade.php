@@ -34,17 +34,17 @@
                                 </div>
                             @endif
                             <div>
-                                <label>Введите название</label><br>
-                                <input id="name" class="control" type="text" value="">
-                                <p id="name_label"></p>
+                                <label>Enter the title</label><br>
+                                <input id="title" class="control" type="text" value="">
+                                <p id="title_label"></p>
                             </div>
                             <div>
-                                <label>Введите для поиска слово</label><br>
-                                <input id="search_word" class="control" type="text" value="">
+                                <label>Enter a search term</label><br>
+                                <input id="search_term" class="control" type="text" value="">
                                 <p id="search_label"></p>
                             </div>
                             <div>
-                                <label id="url_check1">Введите url</label><br>
+                                <label id="url_check1">Enter url</label><br>
                                 <label for="url_check"></label><input id="url_check" class="control" name="url"
                                                                       type="text" value="">
                                 <input id="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
@@ -55,20 +55,20 @@
                                 <p id="url_status"></p>
                             </div>
                             <div>
-                                <label id="code">Введите код ответа</label><br>
-                                <input id="status_code" class="status_code control" type="number" min="200" max="510"
+                                <label id="code">Enter response code</label><br>
+                                <input id="status_code" class="status_code control" type="number" min="200" max="1000"
                                        required>
                                 <p id="code_label"></p>
                             </div>
 
                             <div>
-                                <label id="time1">Введите время</label><br>
+                                <label id="time1">Enter time</label><br>
                                 <input id="time" class="control" type="number" min="1" max="40" required>
                                 <p id="time_label"></p>
                             </div>
 
                             <div>
-                                <label id="count">Введите кол-запросов</label><br>
+                                <label id="count">Enter the number of requests</label><br>
                                 <input id="count_link" class="control" type="number" min="1" max="40" required>
                                 <p id="count_label"></p>
                             </div>
@@ -95,7 +95,7 @@
                                 <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Name</th>
+                                    <th scope="col">Title</th>
                                     <th scope="col">Last ping</th>
                                     <th scope="col">Time</th>
                                     <th scope="col">Code</th>
@@ -114,7 +114,7 @@
                                         <th scope="row">{{$count}}</th>
                                         <td>
                                             <a style="color: #2563eb" href="{{$data['url']}}" target="_blank">
-                                                {{$data['name']}}
+                                                {{$data['title']}}
                                             </a>
                                         </td>
                                         <td>{{$data['last_ping']}}</td>
@@ -133,7 +133,7 @@
                                         </td>
 
                                         <td>
-                                            <button onclick="deleteUrl({{$data['id']}}, '{{$data['name']}}')">
+                                            <button onclick="deleteUrl({{$data['id']}}, '{{$data['title']}}')">
                                                 <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                             </button>
                                         </td>

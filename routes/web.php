@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\BasketController;
+use App\Http\Controllers\PingController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UrlController;
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Notification;
-use NotificationChannels\Telegram\Telegram;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,25 +28,18 @@ Route::resource('/url', UrlController::class)->middleware(['auth']);
 Route::resource('/alert', \App\Http\Controllers\AlertController::class);
 Route::post('/url/ajax-check-url', [UrlController::class, 'ajaxCheckUrl'])->name('ajaxCheckUrl');
 Route::get('/url/ajax-url-form/{id}', [UrlController::class, 'ajaxUrlProdForm'])->name('url.ajax-url-form');
-Route::get('url-ping/ping1', [UrlController::class, 'ping1'])->name('ping1');
-Route::get('url-ping/ping2', [UrlController::class, 'ping2'])->name('ping2');
-Route::get('url-ping/ping3', [UrlController::class, 'ping3'])->name('ping3');
+Route::get('/basket', [BasketController::class, 'basket'])->name('basket')->middleware('auth');
+Route::get('/restore/{id}', [BasketController::class, 'restore'])->name('basket.restore')->middleware('auth');
+Route::get('/delete-trash/{id}', [BasketController::class, 'deleteTrash'])->name('basket.delete-trash')->middleware('auth');
+Route::get('ping1', [PingController::class, 'ping1'])->name('ping1');
+Route::get('ping2', [PingController::class, 'ping2'])->name('ping2');
+Route::get('ping3', [PingController::class, 'ping3'])->name('ping3');
 
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-//Route::post('bot/sendmessage', function() {
-//    Telegram::sendMessage([
-//        'chat_id' => '5087265422',
-//        'text' => 'Привет, мир!'
-//    ]);
-//    return;
-//});
-
-//Notification::route('telegram', '5087265422')
-//    ->notify(new \App\Notifications\Telegram);
 
 require __DIR__.'/auth.php';
 

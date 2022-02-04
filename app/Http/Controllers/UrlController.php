@@ -8,13 +8,16 @@ use App\Models\Url;
 use App\Models\User;
 use App\Services\UrlService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 
 class UrlController extends Controller
 {
     private UrlService $urlService;
 
-
+    /**
+     * @param UrlService $urlService
+     */
     public function __construct(UrlService $urlService)
     {
         $this->urlService = $urlService;
@@ -24,7 +27,7 @@ class UrlController extends Controller
      * Display a listing of the resource.
      *
      */
-    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('urls.index', ['urls' => $this->urlService->initialData()]);
     }
@@ -35,6 +38,7 @@ class UrlController extends Controller
      */
     public function store(UrlRequest $request): \Illuminate\Http\JsonResponse
     {
+        Log::error($request);
         return response()->json(['data' => $this->urlService->storeUrl($request)]);
     }
 
@@ -42,10 +46,10 @@ class UrlController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param $id
+     * @param int
      * @return string
      */
-    public function edit($id): string
+    public function edit(int $id): string
     {
         return view('urls.edit', ['urls' => $this->urlService->editUrl($id)])->render();
     }
@@ -59,14 +63,14 @@ class UrlController extends Controller
     {
         $this->urlService->updateUrl($request, $id);
 
-        return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
+        return redirect()->route('url.edit', $id)->with('success', 'Successfully updated.');
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return string
      */
-    public function destroy($id): string
+    public function destroy(int $id): string
     {
         return view('ajax.ajaxUrlShow', ['urls' => $this->urlService->deleteUrl($id)])->render();
     }
@@ -85,7 +89,10 @@ class UrlController extends Controller
         }
     }
 
-
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function ajaxCheckUrl(Request $request): \Illuminate\Http\JsonResponse
     {
         $status = $this->urlService->curl($request->url_check);
@@ -94,20 +101,6 @@ class UrlController extends Controller
     }
 
 
-    public function ping1()
-    {
-        $this->urlService->ping1();
-    }
-
-    public function ping2()
-    {
-        $this->urlService->ping2();
-    }
-
-    public function ping3()
-    {
-        $this->urlService->ping3();
-    }
 
 }
 //https://habr.com/ru/post/350778/

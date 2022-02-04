@@ -5,7 +5,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="ml-4">
-                        <h1 style="font-size: 20px" class="text-center"><b> Редактирование  </b></h1>
+                        <h1 style="font-size: 20px" class="text-center"><b> Editing  </b></h1>
                         @if ($message = Session::get('success'))
                             <div class="text-center alert alert-success">
                                 <p>{{ $message }}</p>
@@ -25,7 +25,7 @@
                             @method('PUT')
                             <input name="id_project" type="hidden" value="{{$urls['urls']['id_project']}}">
                             @if(Auth::user()->role == 1)
-                                <label for="project">Название проекта</label><br>
+                                <label for="project">Project name</label><br>
                                 <select id="project" name="id_project" class="project control">
 
                                     @foreach($urls['projects'] as $project)
@@ -38,17 +38,17 @@
                                 </select>
                             @endif
                             <div>
-                                <label>Введите название</label><br>
-                                <input id="name" name="name" class="control" type="text" value="{{$urls['urls']['name']}}" required>
-                                <p id="name_label"></p>
+                                <label>Enter the title</label><br>
+                                <input id="title" name="title" class="control" type="text" value="{{$urls['urls']['title']}}" required>
+                                <p id="title_label"></p>
                             </div>
                             <div>
-                                <label>Введите для поиска слово</label><br>
-                                <input id="search_word" name="search_word" class="control" type="text" value="{{$urls['urls']['search_word']}}">
+                                <label>Enter a search term</label><br>
+                                <input id="search_term" name="search_term" class="control" type="text" value="{{$urls['urls']['search_term']}}">
                                 <p id="search_label"></p>
                             </div>
                             <div>
-                                <label id="url_check1">Введите url</label><br>
+                                <label id="url_check1">Enter url</label><br>
                                 <input id="url_check" class="control" name="url"
                                        type="text" value="{{$urls['urls']['url']}}" required>
                                 <button id="check_url_btn" class="check_url_btn btn btn-primary" type="button"
@@ -60,14 +60,14 @@
 
                             <input id="id_user" name="id_user" class="control" type="hidden" value="{{ Auth::user()->id }}">
                             <div>
-                                <label id="code">Введите код ответа</label><br>
+                                <label id="code">Enter response code</label><br>
                                 <input id="status_code" class="status_code control" type="number" min="200" max="510"
                                        name="status_code" value="{{$urls['urls']['status_code']}}" required>
                                 <p id="code_label"></p>
                             </div>
 
                             <div>
-                                <label id="time1">Введите время</label><br>
+                                <label id="time1">Enter time</label><br>
                                 <input id="time" class="control" type="number" min="1" max="40"
                                        name="time_out" value="{{$urls['urls']['time_out']}}"
                                        required>
@@ -75,7 +75,7 @@
                             </div>
 
                             <div>
-                                <label id="count">Введите кол-запросов</label><br>
+                                <label id="count">Enter the number of requests</label><br>
                                 <input id="count_link" class="control" type="number" min="1" max="40"
                                        name="max_count_ping" value="{{$urls['urls']['max_count_ping']}}" required>
                                 <p id="count_label"></p>
@@ -95,9 +95,9 @@
                             <br><br>
 
                             <button style="background-color: green" type="submit" class="btn btn-success">
-                                Обновить
+                                Update
                             </button>
-                            <a href="{{route('url.index')}}" class="btn btn-primary">НАЗАД</a>
+                            <a href="{{route('url.index')}}" class="btn btn-primary">BACK</a>
                         </form>
                     </div>
                 </div>

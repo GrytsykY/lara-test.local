@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 
-use App\Interfaces\Projects\ProjectRepositoryInterface;
+use App\Interfaces\ProjectRepositoryInterface;
 use DB;
 
 class ProjectRepository implements ProjectRepositoryInterface

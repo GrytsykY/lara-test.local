@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Interfaces\Alerts;
+namespace App\Interfaces;
 
 interface AlertRepositoryInterface
 {
@@ -10,7 +10,7 @@ interface AlertRepositoryInterface
     public function getAlertAll(): array;
 
     /**
-     * @param $idAlert
+     * @param int $idAlert
      * @return array
      */
     public function getByIdAlert(int $idAlert): array;

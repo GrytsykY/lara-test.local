@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Interfaces\Alerts\AlertRepositoryInterface;
+use App\Interfaces\AlertRepositoryInterface;
 use DB;
 
 

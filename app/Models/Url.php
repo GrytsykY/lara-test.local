@@ -12,10 +12,12 @@ class Url extends Model
 
     public $timestamps = true;
 
+    protected $dates = ['deleted_at'];
+
     protected $fillable = [
         'url',
-        'name',
-        'search_word',
+        'title',
+        'search_term',
         'time_out',
         'max_count_ping',
         'ping_counter',

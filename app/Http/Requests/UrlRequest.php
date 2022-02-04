@@ -23,13 +23,14 @@ class UrlRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      */
-    #[ArrayShape(['url' => "string", 'name' => "string", 'time_out' => "string", 'max_count_ping' => "string", 'status_code' => "string", 'id_alert' => "string", 'id_user' => "string", 'id_project' => "string"])]
+
+    #[ArrayShape(['url' => "string", 'title' => "string", 'search_term' => "string", 'time_out' => "string", 'max_count_ping' => "string", 'status_code' => "string", 'id_alert' => "string", 'id_user' => "string", 'id_project' => "string"])]
     public function rules(): array
     {
         return [
             'url' => 'required|max:2048',
-            'name' => 'required|string|min:3',
-            'search_word' => 'required|string|min:3',
+            'title' => 'required|string|min:3',
+            'search_term' => '',
             'time_out' => 'required|integer|max:60',
             'max_count_ping' => 'required|integer',
             'status_code' => 'required|integer|min:200|max:500',

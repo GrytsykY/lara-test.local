@@ -4,7 +4,6 @@ namespace App\Services;
 
 
 use App\Repositories\AlertRepository;
-use App\Repositories\PingRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UrlRepository;
 use Carbon\Carbon;
@@ -15,21 +14,20 @@ class UrlService extends BaseService
     protected UrlRepository $urlRepository;
     protected ProjectRepository $projectRepository;
     protected AlertRepository $alertRepository;
-    protected PingRepository $pingRepository;
 
     /**
      * @param UrlRepository $urlRepository
+     * @param ProjectRepository $projectRepository
+     * @param AlertRepository $alertRepository
      */
     public function __construct(UrlRepository     $urlRepository,
                                 ProjectRepository $projectRepository,
                                 AlertRepository   $alertRepository,
-                                PingRepository    $pingRepository
     )
     {
         $this->urlRepository = $urlRepository;
         $this->projectRepository = $projectRepository;
         $this->alertRepository = $alertRepository;
-        $this->pingRepository = $pingRepository;
     }
 
 
@@ -56,13 +54,21 @@ class UrlService extends BaseService
 
     }
 
-    public function storeUrl($request): array
+    /**
+     * @param object $request
+     * @return array
+     */
+    public function storeUrl(object $request): array
     {
         return $this->urlRepository->store($request);
     }
 
+    /**
+     * @param int $id
+     * @return array
+     */
     #[ArrayShape(['urls' => "array", 'projects' => "array", 'alerts' => "array"])]
-    public function editUrl($id): array
+    public function editUrl(int $id): array
     {
         $user = \Auth::user();
 
@@ -81,109 +87,123 @@ class UrlService extends BaseService
 
     }
 
-    public function updateUrl($request, $id)
+    /**
+     * @param object $request
+     * @param int $id
+     * @return mixed
+     */
+    public function updateUrl(object $request, int $id): mixed
     {
         return $this->urlRepository->update($request, $id);
     }
 
-    public function deleteUrl($id): array
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function deleteUrl(int $id): array
     {
         return $this->urlRepository->delete($id);
     }
 
-    public function ajaxCheckUrl($id): array
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function ajaxCheckUrl(int $id): array
     {
         return $this->urlRepository->ajaxUrlShowTable($id);
     }
 
+
     public function ping1()
     {
-        $urls = $this->pingRepository->getTimeOutAndLastPing($this->dateNow());
+        set_time_limit(360);
+        $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
 
-        if (!empty($urls))
-        foreach ($urls as $url) {
+        if (!empty($urls)) {
+            foreach ($urls as $url) {
 
-            $status = $this->curl($url['url']);
-            dump($url['url'] . ' ' . $status);
-            if ($status == $url['status_code']) {
-                // отправляем сообщение
+                $searchTeam = false;
+                if ($url['search_term'] == null) $searchTeam = true;
+                $status = $this->curl($url['url']);
 
-                $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+                if ($status == $url['status_code']) {
 
-            } else {
+                    $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
-                if ($url['max_count_ping'] == 1) {
-                    $status = $this->curl($url['url']);
-
-                    if ($status == $url['status_code']) {
-
-                        $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
-                    } else {
-
-                        $this->answerAlertIsNot($url);
-                    }
                 } else {
 
-                    $this->pingRepository->updatePingCounterFieldOne($url, $this->dateNow());
-                }
-            }
+                    if ($url['max_count_ping'] == 1) {
+                        $status = $this->curl($url['url']);
 
+                        if ($status == $url['status_code']) {
+                            $this->answerAlertIsOk($url, $searchTeam);
+                            $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
+                        } else {
+
+                            $this->answerAlertIsNot($url);
+                        }
+                    } else {
+
+                        $this->urlRepository->updatePingCounterFieldOne($url, $this->dateNow());
+                    }
+                }
+
+            }
         }
+
     }
 
     public function ping2()
     {
-        $urls = $this->pingRepository->selectLastPingAndOneMinute($this->dateNow());
+        set_time_limit(360);
+        $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
-        if (!empty($urls ))
-        foreach ($urls as $url) {
+        if (!empty($urls))
+            foreach ($urls as $url) {
+                $searchTeam = false;
+                if ($url['search_term'] == null) $searchTeam = true;
 
-            $status = $this->curl($url['url']);
-            dump($status);
-            if ($status == $url['status_code']) {
+                $status = $this->curl($url['url']);
 
-                $this->answerAlertIsOk($url);
+                if ($status == $url['status_code']) {
 
-                $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+                    $this->answerAlertIsOk($url, $searchTeam);
 
-            } else {
+                    $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
-                if ($url['max_count_ping'] >= 1) {
-                    $status = $this->curl($url['url']);
+                } else {
+
+                    if ($url['max_count_ping'] >= 1) {
 
 
-                    if ($status == $url['status_code']) {
-
-                        $this->answerAlertIsOk($url);
-
-                    } else {
-
-                        $this->pingRepository->updatePingCounterFieldOne($url, $this->dateNow());
+                        $this->urlRepository->updatePingCounterFieldOne($url, $this->dateNow());
 
                         if ($url['max_count_ping'] == $url['ping_counter'] + 1) {
                             $this->answerAlertIsNot($url);
                         }
                     }
                 }
+
             }
 
-        }
-
-        dump($urls);
     }
 
     public function ping3()
     {
+        set_time_limit(360);
+        $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
 
-        $urls = $this->pingRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
-        dump($urls);
         foreach ($urls as $url) {
+            $searchTeam = false;
+            if ($url['search_term'] == null) $searchTeam = true;
 
             $status = $this->curl($url['url']);
 
             if ($status == $url['status_code']) {
 
-                $this->answerAlertIsOk($url);
+                $this->answerAlertIsOk($url, $searchTeam);
 
             }
 
@@ -191,13 +211,18 @@ class UrlService extends BaseService
 
     }
 
-    public function curl($url, $params = [])
+    /**
+     * @param string $url
+     * @param array $params
+     * @return mixed
+     */
+    public function curl(string $url, array $params = []): mixed
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 90);
         if (!empty($params)) {
             curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -210,7 +235,11 @@ class UrlService extends BaseService
         return $status;
     }
 
-    protected function tel_curl($id, $message)
+    /**
+     * @param int $id
+     * @param string $message
+     */
+    protected function tel_curl(int $id, string $message)
     {
         $botToken = '5243206235:AAEsYTDkugFDDt6pGq8iw1CeivhNwVRP3ck';
         $website = "https://api.telegram.org/bot" . $botToken;
@@ -223,6 +252,9 @@ class UrlService extends BaseService
         $this->curl($url, $params);
     }
 
+    /**
+     * @return Carbon
+     */
     protected function dateNow(): Carbon
     {
         $current = Carbon::now();
@@ -232,19 +264,22 @@ class UrlService extends BaseService
 
     /**
      * @param mixed $url
+     * @param bool $searchTeam
      */
-    public function answerAlertIsOk(mixed $url): void
+    public function answerAlertIsOk(mixed $url, bool $searchTeam): void
     {
-        if (strpos(file_get_contents($url['url']), $url['search_word']))
-            $text = "Есть такое слово: " . $url['search_word'];
-        else
-            $text = "Нет такого слова (или текста): " . $url['search_word'];
-
+        $text = '';
+        if ($searchTeam) {
+            if (strpos(file_get_contents($url['url']), $url['search_term']))
+                $text = "Есть такое слово: " . $url['search_term'];
+            else
+                $text = "Нет такого слова (или текста): " . $url['search_term'];
+        }
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)
             $this->tel_curl($project[0]['chat_id'], 'Сайт работает! ' . $text);
 
-        $this->pingRepository->updatePingNull($url['id'], $this->dateNow());
+        $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
     }
 
@@ -259,6 +294,31 @@ class UrlService extends BaseService
             $this->tel_curl($project[0]['chat_id'], $url['name'] . ' ' . $alert[0]['name'] .
                 ' ' . $alert[0]['description']);
 
-        $this->pingRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+        $this->urlRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+    }
+
+    /**
+     * @return array
+     */
+    public function basket(): array
+    {
+        return $this->urlRepository->basket();
+    }
+
+    /**
+     * @param int $id
+     */
+    public function restore(int $id)
+    {
+        return $this->urlRepository->restore($id);
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function deleteTrash(int $id): array
+    {
+        return $this->urlRepository->deleteTrash($id);
     }
 }
