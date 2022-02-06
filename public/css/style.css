@@ -6,6 +6,18 @@
 /*div {*/
 /*    margin-bottom: 10px;*/
 /*}*/
+.none {
+    display: none;
+}
+.blockTable table{
+    display: block;
+}
+.noneImg img{
+    display: none;
+}
+.blockImg img{
+    display: block;
+}
 
 label {
     font-weight: bold;

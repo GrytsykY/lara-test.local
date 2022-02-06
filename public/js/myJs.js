@@ -237,7 +237,6 @@ function deleteUrl(id, name) {
                         },
                         success: function (response) {
                             $('#mytable').html(response);
-                            // checkUrl();
 
                             console.log(response);
                         },

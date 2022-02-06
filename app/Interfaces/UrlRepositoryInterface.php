@@ -2,38 +2,40 @@
 
 namespace App\Interfaces;
 
+use App\Http\Requests\UrlRequest;
+
 interface UrlRepositoryInterface
 {
     /**
      * @param int $idProject
      * @return array
      */
-   public function getUrlByIdProject(int $idProject):array;
+    public function getUrlByIdProject(int $idProject): array;
 
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @return array
      */
-    public function store(object $request):array;
+    public function store(UrlRequest $request): array;
 
     /**
      * @param int $id
      * @return array
      */
-    public function edit(int $id):array;
+    public function edit(int $id): array;
 
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @param int $id
-     * @return mixed
+     * @return bool
      */
-    public function update(object $request, int $id): mixed;
+    public function update(UrlRequest $request, int $id): bool;
 
     /**
      * @param int $id
      * @return array
      */
-    public function ajaxUrlShowTable(int $id):array;
+    public function ajaxUrlShowTable(int $id): array;
 
     /**
      * @return array
@@ -44,43 +46,43 @@ interface UrlRepositoryInterface
      * @param int $id
      * @return array
      */
-    public function delete(int $id):array;
+    public function delete(int $id): array;
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function getTimeOutAndLastPing($current):array;
+    public function getTimeOutAndLastPing(string $current): array;
 
     /**
-     * @param $id
-     * @param $current
+     * @param int $id
+     * @param string $current
      */
-    public function updatePingNull($id, $current): void;
+    public function updatePingNull(int $id, string $current): void;
 
     /**
-     * @param $url
-     * @param $current
+     * @param array $url
+     * @param string $current
      */
-    public function updatePingCounterFieldOneSentAlertOne($url, $current): void;
+    public function updatePingCounterFieldOneSentAlertOne(array $url, string $current): void;
 
     /**
-     * @param $url
-     * @param $current
+     * @param array $url
+     * @param string $current
      */
-    public function updatePingCounterFieldOne($url, $current): void;
+    public function updatePingCounterFieldOne(array $url, string $current): void;
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function selectLastPingAndOneMinute($current): array;
+    public function selectLastPingAndOneMinute(string $current): array;
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne($current): array;
+    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(string $current): array;
 
     /**
      * @return array
@@ -97,4 +99,6 @@ interface UrlRepositoryInterface
      * @return array
      */
     public function deleteTrash(int $id): array;
+
+
 }

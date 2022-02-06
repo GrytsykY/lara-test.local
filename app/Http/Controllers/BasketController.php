@@ -8,7 +8,9 @@ class BasketController extends Controller
 {
     private UrlService $urlService;
 
-
+    /**
+     * @param UrlService $urlService
+     */
     public function __construct(UrlService $urlService)
     {
         $this->urlService = $urlService;

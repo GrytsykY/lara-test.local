@@ -2,33 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\PingRepository;
+use App\Repositories\UrlRepository;
 use App\Services\UrlService;
-use Illuminate\Http\Request;
 
 class PingController extends Controller
 {
     private UrlService $urlService;
+    private PingRepository $pingRepository;
 
     /**
      * @param UrlService $urlService
+     * @param PingRepository $pingRepository
      */
-    public function __construct(UrlService $urlService)
+    public function __construct(UrlService $urlService,PingRepository $pingRepository)
     {
         $this->urlService = $urlService;
+        $this->pingRepository = $pingRepository;
     }
 
     public function ping1()
     {
-        $this->urlService->ping1();
+        $start = $this->pingRepository->start();
+        if ($start[0]['start1'] == 1) $this->urlService->ping1();
     }
 
     public function ping2()
     {
-        $this->urlService->ping2();
+        $start = $this->pingRepository->start();
+        if ($start[0]['start2'] == 1) $this->urlService->ping2();
     }
 
     public function ping3()
     {
-        $this->urlService->ping3();
+        $start = $this->pingRepository->start();
+        if ($start[0]['start3'] == 1) $this->urlService->ping3();
     }
 }

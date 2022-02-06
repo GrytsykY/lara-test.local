@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 
+use App\Http\Requests\UrlRequest;
 use App\Interfaces\UrlRepositoryInterface;
 use App\Models\Url;
 use DB;
@@ -10,10 +11,10 @@ use DB;
 class UrlRepository implements UrlRepositoryInterface
 {
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @return array
      */
-    public function store(object $request): array
+    public function store(UrlRequest $request): array
     {
         $url = new Url($request->validated());
         $url->save();
@@ -30,11 +31,11 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @param int $id
-     * @return mixed
+     * @return bool
      */
-    public function update(object $request, int $id): mixed
+    public function update(UrlRequest $request, int $id):bool
     {
         return Url::find($id)->update($request->all());
     }
@@ -64,7 +65,7 @@ class UrlRepository implements UrlRepositoryInterface
     /**
      * @return \Illuminate\Support\Collection
      */
-    public function selectUrlOutTimeAndLastPing($current): \Illuminate\Support\Collection
+    public function selectUrlOutTimeAndLastPing(string $current): \Illuminate\Support\Collection
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
@@ -103,10 +104,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function getTimeOutAndLastPing($current): array
+    public function getTimeOutAndLastPing(string $current): array
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
@@ -119,11 +120,12 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $id
-     * @param $current
+     * @param int $id
+     * @param string $current
      */
-    public function updatePingNull($id, $current): void
+    public function updatePingNull(int $id, string $current): void
     {
+        \Log::debug($current);
         DB::table('urls')
             ->where('id', '=', $id)
             ->update([
@@ -135,10 +137,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $url
-     * @param $current
+     * @param array $url
+     * @param string $current
      */
-    public function updatePingCounterFieldOneSentAlertOne($url, $current): void
+    public function updatePingCounterFieldOneSentAlertOne(array $url, string $current): void
     {
         DB::table('urls')
             ->where('id', '=', $url['id'])
@@ -151,10 +153,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $url
-     * @param $current
+     * @param array $url
+     * @param string $current
      */
-    public function updatePingCounterFieldOne($url, $current): void
+    public function updatePingCounterFieldOne(array $url, string $current): void
     {
         DB::table('urls')
             ->where('id', '=', $url['id'])
@@ -166,10 +168,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function selectLastPingAndOneMinute($current): array
+    public function selectLastPingAndOneMinute(string $current): array
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL 1 MINUTE)")
@@ -183,10 +185,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $current
+     * @param string $current
      * @return array
      */
-    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne($current): array
+    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(string $current): array
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
@@ -200,10 +202,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param $url
+     * @param Url $url
      * @return array
      */
-    protected function urlAll($url): array
+    protected function urlAll(Url $url): array
     {
         return DB::table('urls')
             ->where('id_project', '=', $url->id_project)
@@ -225,7 +227,7 @@ class UrlRepository implements UrlRepositoryInterface
     /**
      * @param int $id
      */
-    public function restore(int $id): void
+    public function restore(int $id)
     {
         $url = Url::withTrashed()->find($id);
         $url->restore();

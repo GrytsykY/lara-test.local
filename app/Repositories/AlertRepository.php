@@ -8,7 +8,9 @@ use DB;
 
 class AlertRepository implements AlertRepositoryInterface
 {
-
+    /**
+     * @return array
+     */
     public function getAlertAll(): array
     {
         return DB::table('alerts')->get()->map(function ($obj){
@@ -16,6 +18,10 @@ class AlertRepository implements AlertRepositoryInterface
         })->toArray();
     }
 
+    /**
+     * @param int $idAlert
+     * @return array
+     */
     public function getByIdAlert(int $idAlert): array
     {
         return DB::table('alerts')->where('id', '=', $idAlert)->get()->map(function ($obj){

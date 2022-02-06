@@ -1,11 +1,5 @@
 <div id="error_mes" class="error_mes">
-
 </div>
-{{--                    <a href="{{route('ping1')}}">URL</a>--}}
-{{--                    <div class="search">--}}
-{{--                        <input id="textInput" class="search" type="text" value=""/>--}}
-{{--                        <input id="clearButton" class="submit" value="Clear" />--}}
-{{--                    </div>--}}
 
 {{-- таблица вывода url --}}
 
@@ -41,9 +35,6 @@
             <td>{{$data['status_code']}}</td>
             <td>{{$data['max_count_ping']}}</td>
             <td>
-{{--                <button onclick="editUrl({{$data->id}})">--}}
-{{--                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
-{{--                </button>--}}
                 <form action="url/{{$data['id']}}/edit" method="get">
                     <button type="submit">
                         <i style="color: #2563eb" class="fas fa-pen"></i>
@@ -62,5 +53,7 @@
     @endforeach
     </tbody>
 </table>
+
+
 
 

@@ -19,7 +19,7 @@
                         <div class="col-5">
                             @if(Auth::user()->role == 1)
                                 <div id="select_project">
-                                    <label for="project">Название проекта</label><br>
+                                    <label for="project">Project name</label><br>
                                     {{--                                    @dd($urls)--}}
                                     <select id="project" class="project control">
                                         @foreach($urls['projects'] as $project)
@@ -90,6 +90,7 @@
                         </div>
 
                         {{-- таблица вывода url --}}
+
                         <div class="col-7">
                             <table id="mytable" class="table">
                                 <thead>
@@ -142,12 +143,12 @@
                                 @endforeach
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
 </x-app-layout>

@@ -7,6 +7,7 @@ use App\Models\Alert;
 use App\Models\Url;
 use App\Models\User;
 use App\Services\UrlService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -56,10 +57,10 @@ class UrlController extends Controller
 
     /**
      * @param UrlRequest $request
-     * @param $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @param int $id
+     * @return RedirectResponse
      */
-    public function update(UrlRequest $request, $id): \Illuminate\Http\RedirectResponse
+    public function update(UrlRequest $request, int $id): RedirectResponse
     {
         $this->urlService->updateUrl($request, $id);
 
@@ -77,10 +78,10 @@ class UrlController extends Controller
 
     /**
      * @param Request $request
-     * @param $id
+     * @param int $id
      * @return string|void
      */
-    protected function ajaxUrlProdForm(Request $request, $id)
+    protected function ajaxUrlProdForm(Request $request, int $id)
     {
         $urls = $this->urlService->ajaxCheckUrl($id);
 

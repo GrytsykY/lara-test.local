@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\PingController;
 use App\Http\Controllers\TestController;
@@ -25,15 +26,15 @@ Route::get('/', function () {
 Route::get('/test', [TestController::class, 'index']);
 
 Route::resource('/url', UrlController::class)->middleware(['auth']);
-Route::resource('/alert', \App\Http\Controllers\AlertController::class);
+Route::resource('/alert', AlertController::class);
 Route::post('/url/ajax-check-url', [UrlController::class, 'ajaxCheckUrl'])->name('ajaxCheckUrl');
 Route::get('/url/ajax-url-form/{id}', [UrlController::class, 'ajaxUrlProdForm'])->name('url.ajax-url-form');
 Route::get('/basket', [BasketController::class, 'basket'])->name('basket')->middleware('auth');
 Route::get('/restore/{id}', [BasketController::class, 'restore'])->name('basket.restore')->middleware('auth');
 Route::get('/delete-trash/{id}', [BasketController::class, 'deleteTrash'])->name('basket.delete-trash')->middleware('auth');
-Route::get('ping1', [PingController::class, 'ping1'])->name('ping1');
-Route::get('ping2', [PingController::class, 'ping2'])->name('ping2');
-Route::get('ping3', [PingController::class, 'ping3'])->name('ping3');
+Route::get('ping1', [PingController::class, 'ping1'])->name('ping1');//->middleware(['auth']);
+Route::get('ping2', [PingController::class, 'ping2'])->name('ping2')->middleware(['auth']);
+Route::get('ping3', [PingController::class, 'ping3'])->name('ping3')->middleware(['auth']);
 
 
 Route::get('/dashboard', function () {

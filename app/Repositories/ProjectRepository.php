@@ -8,7 +8,10 @@ use DB;
 
 class ProjectRepository implements ProjectRepositoryInterface
 {
-
+    /**
+     * @param int $idProject
+     * @return array
+     */
     public function getProjectByIdProject(int $idProject): array
     {
         return DB::table('projects')->where('id', '=', $idProject)->get()->map(function ($obj){
@@ -16,6 +19,9 @@ class ProjectRepository implements ProjectRepositoryInterface
         })->toArray();
     }
 
+    /**
+     * @return array
+     */
     public function getProjectAll(): array
     {
         return DB::table('projects')->get()->map(function ($obj){

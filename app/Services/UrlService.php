@@ -3,7 +3,9 @@
 namespace App\Services;
 
 
+use App\Http\Requests\UrlRequest;
 use App\Repositories\AlertRepository;
+use App\Repositories\PingRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UrlRepository;
 use Carbon\Carbon;
@@ -14,20 +16,24 @@ class UrlService extends BaseService
     protected UrlRepository $urlRepository;
     protected ProjectRepository $projectRepository;
     protected AlertRepository $alertRepository;
+    protected PingRepository $pingRepository;
 
     /**
      * @param UrlRepository $urlRepository
      * @param ProjectRepository $projectRepository
      * @param AlertRepository $alertRepository
+     * @param PingRepository $pingRepository
      */
     public function __construct(UrlRepository     $urlRepository,
                                 ProjectRepository $projectRepository,
                                 AlertRepository   $alertRepository,
+                                PingRepository $pingRepository
     )
     {
         $this->urlRepository = $urlRepository;
         $this->projectRepository = $projectRepository;
         $this->alertRepository = $alertRepository;
+        $this->pingRepository = $pingRepository;
     }
 
 
@@ -55,10 +61,10 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @return array
      */
-    public function storeUrl(object $request): array
+    public function storeUrl(UrlRequest $request): array
     {
         return $this->urlRepository->store($request);
     }
@@ -88,11 +94,11 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param object $request
+     * @param UrlRequest $request
      * @param int $id
-     * @return mixed
+     * @return bool
      */
-    public function updateUrl(object $request, int $id): mixed
+    public function updateUrl(UrlRequest $request, int $id): bool
     {
         return $this->urlRepository->update($request, $id);
     }
@@ -118,32 +124,28 @@ class UrlService extends BaseService
 
     public function ping1()
     {
+        $this->pingRepository->stopUpdate('start1');
+
         set_time_limit(360);
         $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
 
         if (!empty($urls)) {
             foreach ($urls as $url) {
-
                 $searchTeam = false;
-                if ($url['search_term'] == null) $searchTeam = true;
+                if ($url['search_term'] != null) $searchTeam = true;
                 $status = $this->curl($url['url']);
 
                 if ($status == $url['status_code']) {
 
+                    $this->answerAlertIsOk($url, $searchTeam);
                     $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
                 } else {
 
                     if ($url['max_count_ping'] == 1) {
-                        $status = $this->curl($url['url']);
 
-                        if ($status == $url['status_code']) {
-                            $this->answerAlertIsOk($url, $searchTeam);
-                            $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
-                        } else {
+                        $this->answerAlertIsNot($url);
 
-                            $this->answerAlertIsNot($url);
-                        }
                     } else {
 
                         $this->urlRepository->updatePingCounterFieldOne($url, $this->dateNow());
@@ -152,18 +154,19 @@ class UrlService extends BaseService
 
             }
         }
-
+        $this->pingRepository->startUpdate('start1');
     }
 
     public function ping2()
     {
+        $this->pingRepository->stopUpdate('start2');
         set_time_limit(360);
         $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
         if (!empty($urls))
             foreach ($urls as $url) {
                 $searchTeam = false;
-                if ($url['search_term'] == null) $searchTeam = true;
+                if ($url['search_term'] != null) $searchTeam = true;
 
                 $status = $this->curl($url['url']);
 
@@ -177,7 +180,6 @@ class UrlService extends BaseService
 
                     if ($url['max_count_ping'] >= 1) {
 
-
                         $this->urlRepository->updatePingCounterFieldOne($url, $this->dateNow());
 
                         if ($url['max_count_ping'] == $url['ping_counter'] + 1) {
@@ -187,17 +189,18 @@ class UrlService extends BaseService
                 }
 
             }
-
+        $this->pingRepository->startUpdate('start2');
     }
 
     public function ping3()
     {
+        $this->pingRepository->stopUpdate('start3');
         set_time_limit(360);
         $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
 
         foreach ($urls as $url) {
             $searchTeam = false;
-            if ($url['search_term'] == null) $searchTeam = true;
+            if ($url['search_term'] != null) $searchTeam = true;
 
             $status = $this->curl($url['url']);
 
@@ -208,15 +211,15 @@ class UrlService extends BaseService
             }
 
         }
-
+        $this->pingRepository->startUpdate('start3');
     }
 
     /**
      * @param string $url
      * @param array $params
-     * @return mixed
+     * @return int
      */
-    public function curl(string $url, array $params = []): mixed
+    public function curl(string $url, array $params = []): int
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -263,10 +266,10 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param mixed $url
+     * @param array $url
      * @param bool $searchTeam
      */
-    public function answerAlertIsOk(mixed $url, bool $searchTeam): void
+    public function answerAlertIsOk(array $url, bool $searchTeam): void
     {
         $text = '';
         if ($searchTeam) {
@@ -284,14 +287,14 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param mixed $url
+     * @param array $url
      */
-    public function answerAlertIsNot(mixed $url): void
+    public function answerAlertIsNot(array $url): void
     {
         $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)
-            $this->tel_curl($project[0]['chat_id'], $url['name'] . ' ' . $alert[0]['name'] .
+            $this->tel_curl($project[0]['chat_id'], 'Сайт не работает!!! '.$url['title'] . ' ' . $alert[0]['name'] .
                 ' ' . $alert[0]['description']);
 
         $this->urlRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
