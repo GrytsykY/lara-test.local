@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Alert;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Seeder;
 
@@ -15,34 +16,35 @@ class AlertSeeder extends Seeder
      */
     public function run()
     {
-//        for ($i = 1; $i < 4; $i++) {
-//            $alerts = new Alert([
-//                'name' => 'Prod_' . $i,
-//                'description' => 'Success_' . $i
-//            ]);
-//            $alerts->save();
-//        }
 
         $data = array(
             [
                 'name' => 'Success',
                 'description' => 'Все нормально',
-                'class' => 'success'
+                'class' => 'success',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ],
             [
                 'name' => 'Primary',
                 'description' => 'Не все  плохо',
-                'class' => 'primary'
+                'class' => 'primary',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ],
             [
                 'name' => 'Warning',
                 'description' => 'Предупреждение',
-                'class' => 'warning'
+                'class' => 'warning',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ],
             [
                 'name' => 'Danger',
                 'description' => 'Все очень плохо',
-                'class' => 'danger'
+                'class' => 'danger',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
             ],
         );
 

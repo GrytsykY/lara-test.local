@@ -3,187 +3,256 @@
 namespace App\Repositories;
 
 
+use App\Http\Requests\UrlRequest;
 use App\Interfaces\UrlRepositoryInterface;
-use App\Models\Alert;
-use App\Models\Project;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Url;
+use DB;
 
 class UrlRepository implements UrlRepositoryInterface
 {
-
-
-    public function userProjectAll(): array
+    /**
+     * @param UrlRequest $request
+     * @return array
+     */
+    public function store(UrlRequest $request): array
     {
-        $user = \Auth::user();
-//dd($user);
-        if ($user->role == 0) {
-            $urls = DB::table('urls')->where('id_project', '=', $user->id_project)->get();
-            $projects = DB::table('projects')->where('id', '=', $user->id_project)->get();
-            $urls_proj = ['urls' => $urls, 'project' => $projects];
-            return $urls_proj;
-        } else {
-            $urls = DB::table('urls')
-                ->orderBy('id_project', 'asc')
-                ->where('id_project', '=', 1)
-                ->get();
-            $projects = Project::all();
-
-            $urls_proj = ['urls' => $urls, 'project' => $projects];
-            return $urls_proj;
-        }
+        $url = new Url($request->validated());
+        $url->save();
+        return $url->toArray();
     }
 
-    public function edit()
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function edit(int $id): array
     {
-        $user = \Auth::user();
-
-        if ($user->role == 0) {
-            $projects = DB::table('projects')->where('id', '=', $user->id_project)->get();
-        } else {
-            $projects = Project::all();
-        }
-
-        return $projects;
+        return Url::find($id)->toArray();
     }
 
-    public function deleteUrl($url): \Illuminate\Support\Collection
+    /**
+     * @param UrlRequest $request
+     * @param int $id
+     * @return bool
+     */
+    public function update(UrlRequest $request, int $id):bool
     {
-        $urls = DB::table('urls')
-            ->where('id_project', '=', $url->id_project)
-            ->get();
-
-        return $urls;
+        return Url::find($id)->update($request->all());
     }
 
-    public function ajaxUrlProdForm($id): \Illuminate\Support\Collection
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function delete(int $id): array
     {
-        $urls = DB::table('urls')->where('id_project', '=', $id)->get();
-
-        return $urls;
+        $url = Url::find($id);
+        $url->delete();
+        return $this->urlAll($url);
     }
 
-    public function updatePingNull($id)
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function ajaxUrlShowTable(int $id): array
     {
+        return DB::table('urls')->where('id_project', '=', $id)->get()->map(function ($obj) {
+            return get_object_vars($obj);
+        })->toArray();
+    }
+
+    /**
+     * @param string $current
+     * @return \Illuminate\Support\Collection
+     */
+    public function selectUrlOutTimeAndLastPing(string $current): \Illuminate\Support\Collection
+    {
+        return DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', false)
+            ->get()->whereNull('deleted_at');
+    }
+
+    /**
+     * @param int $idProject
+     * @return array
+     */
+    public function getUrlByIdProject(int $idProject): array
+    {
+        return DB::table('urls')->where('id_project', '=', $idProject)
+            ->whereNull('deleted_at')
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
+            return get_object_vars($obj);
+        })->toArray();
+    }
+
+    /**
+     * @return array
+     */
+    public function getUrlProjectIdOneAll(): array
+    {
+        return DB::table('urls')
+            ->orderBy('id', 'asc')
+            ->where('id_project', '=', 1)
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
+                return get_object_vars($obj);
+            })->toArray();
+    }
+
+    /**
+     * @param string $current
+     * @return array
+     */
+    public function getTimeOutAndLastPing(string $current): array
+    {
+        return DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', 0)
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
+                return get_object_vars($obj);
+            })->toArray();
+    }
+
+    /**
+     * @param int $id
+     * @param string $current
+     */
+    public function updatePingNull(int $id, string $current): void
+    {
+        \Log::debug($current);
         DB::table('urls')
             ->where('id', '=', $id)
             ->update([
                 'is_failed' => 0,
                 'ping_counter' => 0,
                 'is_sent_alert' => 0,
-                'last_ping' => $this->dateNow()
+                'last_ping' => $current
             ]);
     }
 
-    public function selectUrlOutTimeAndLastPing(): \Illuminate\Support\Collection
-    {
-        $current = $this->dateNow();
-        $urls = DB::table("urls")
-            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
-            ->where('is_failed', '=', false)
-            ->get();
-        return $urls;
-    }
-
-    public function selectUrlOutTimeAndLastPingFieldOneSentAlertOne(): \Illuminate\Support\Collection
-    {
-        $current = $this->dateNow();
-        $urls = DB::table("urls")
-            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
-            ->where('is_failed', '=', 1)
-            ->where('is_sent_alert', '=', 1)
-            ->get();
-        return $urls;
-    }
-
-
-    public function selectAlertId($url): \Illuminate\Support\Collection
-    {
-        $alert = DB::table('alerts')->where('id', '=', $url->id_alert)->get();
-        return $alert;
-    }
-
-    public function selectProjectId($url): \Illuminate\Support\Collection
-    {
-        $project = DB::table('projects')->where('id', '=', $url->id_project)->get();
-        return $project;
-    }
-
-    public function updatePingCounterFieldOneSentAlertOne($url)
+    /**
+     * @param array $url
+     * @param string $current
+     */
+    public function updatePingCounterFieldOneSentAlertOne(array $url, string $current): void
     {
         DB::table('urls')
-            ->where('id', '=', $url->id)
+            ->where('id', '=', $url['id'])
             ->update([
-                'ping_counter' => $url->ping_counter + 1,
+                'ping_counter' => $url['ping_counter'] + 1,
                 'is_failed' => 1,
                 'is_sent_alert' => 1,
-                'last_ping' => $this->dateNow()
+                'last_ping' => $current
             ]);
     }
 
-    public function updatePingCounterFieldOne($url)
+    /**
+     * @param array $url
+     * @param string $current
+     */
+    public function updatePingCounterFieldOne(array $url, string $current): void
     {
         DB::table('urls')
-            ->where('id', '=', $url->id)
+            ->where('id', '=', $url['id'])
             ->update([
-                'ping_counter' => $url->ping_counter + 1,
+                'ping_counter' => $url['ping_counter'] + 1,
                 'is_failed' => 1,
-                'last_ping' => $this->dateNow()
+                'last_ping' => $current
             ]);
     }
 
-   public function selectLastPingAndOneMinute(): \Illuminate\Support\Collection
-   {
-       $current = $this->dateNow();
-       $urls = DB::table("urls")
-           ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL 1 MINUTE)")
-           ->where('is_failed', '=', 1)
-           ->where('is_sent_alert', '=', 0)
-           ->get();
-       return $urls;
-   }
-
-    protected function dateNow(): Carbon
+    /**
+     * @param string $current
+     * @return array
+     */
+    public function selectLastPingAndOneMinute(string $current): array
     {
-        $current = Carbon::now();
-        $current->format('Y-m-d H:i:s');
-        return $current;
-    }
-
-    public function getUrlByIdProject(int $idProject): array
-    {
-        return DB::table('urls')->where('id_project', '=', $idProject)->get()->map(function ($obj){
-            return get_object_vars($obj);
-        })->toArray();
-    }
-
-    public function getProjectByIdProject(int $idProject):array
-    {
-        return DB::table('projects')->where('id', '=', $idProject)->get()->map(function ($obj){
-            return get_object_vars($obj);
-        })->toArray();
-    }
-
-    public function getAlertAll(): array
-    {
-        return Alert::all()->map(function ($obj){
-            return get_object_vars($obj);
-        })->toArray();
-    }
-
-    public function getProjectAll(): array
-    {
-        return DB::table('urls')
-            ->orderBy('id_project', 'asc')
-            ->where('id_project', '=', 1)
-            ->get()->map(function ($obj){
+        return DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL 1 MINUTE)")
+            ->where('is_failed', '=', 1)
+            ->where('is_sent_alert', '=', 0)
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
                 return get_object_vars($obj);
             })->toArray();
     }
 
-    public function getUrlProjectIdOneAll(): array
+    /**
+     * @param string $current
+     * @return array
+     */
+    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(string $current): array
     {
-        return Project::all()->map(function ($obj){
+        return DB::table("urls")
+            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->where('is_failed', '=', 1)
+            ->where('is_sent_alert', '=', 1)
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
+                return get_object_vars($obj);
+            })->toArray();
+    }
+
+    /**
+     * @param Url $url
+     * @return array
+     */
+    protected function urlAll(Url $url): array
+    {
+        return DB::table('urls')
+            ->where('id_project', '=', $url->id_project)
+            ->get()
+            ->whereNull('deleted_at')
+            ->map(function ($obj) {
+                return get_object_vars($obj);
+            })->toArray();
+    }
+
+    /**
+     * @return array
+     */
+    public function basket(): array
+    {
+        return $this->softDelShow();
+    }
+
+    /**
+     * @param int $id
+     */
+    public function restore(int $id): void
+    {
+        $url = Url::withTrashed()->find($id);
+        $url->restore();
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function deleteTrash(int $id): array
+    {
+        Url::withTrashed()->where('id', $id)->forceDelete();
+        return $this->softDelShow();
+    }
+
+    /**
+     * @return array
+     */
+    protected function softDelShow(): array
+    {
+        return DB::table('urls')
+            ->where('deleted_at', '!=', 'null')
+            ->get()
+            ->map(function ($obj) {
             return get_object_vars($obj);
         })->toArray();
     }

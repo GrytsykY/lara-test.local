@@ -1,8 +1,4 @@
-<div id="error_mes" class="error_mes">
-</div>
-
-{{-- таблица вывода url --}}
-
+@if(!empty($urls))
 <table id="mytable" class="table">
     <thead>
     <tr>
@@ -12,15 +8,14 @@
         <th scope="col">Time</th>
         <th scope="col">Code</th>
         <th scope="col">Max ping</th>
-        <th></th>
-        <th></th>
+        <th>restore</th>
+        <th>delete</th>
     </tr>
     </thead>
     <tbody>
     @php $count = 0; @endphp
-{{--    @dd($urls)--}}
     @foreach($urls as $key=> $data)
-        {{--        @if(Auth::user()->id_project == $data->id_project)--}}
+        {{--                                    @if((Auth::user()->id_project == $data->id_project))--}}
         @php $count++; @endphp
 
         <tr id="row_{{$data['id']}}">
@@ -35,25 +30,32 @@
             <td>{{$data['status_code']}}</td>
             <td>{{$data['max_count_ping']}}</td>
             <td>
-                <form action="url/{{$data['id']}}/edit" method="get">
+                {{--                                                <button onclick="editUrl({{$data->id}})">--}}
+                {{--                                                    <i style="color: #2563eb" class="fas fa-pen"></i>--}}
+                {{--                                                </button>--}}
+                <form action="restore/{{$data['id']}}" method="get">
                     <button type="submit">
-                        <i style="color: #2563eb" class="fas fa-pen"></i>
+                        <i style="color: #254deb" class="fas fa-trash-restore"></i>
                     </button>
                 </form>
             </td>
 
             <td>
-                <button type="button" onclick="deleteUrl({{$data['id']}}, '{{$data['title']}}')">
+                <button onclick="deleteTrash({{$data['id']}}, '{{$data['title']}}')">
                     <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                 </button>
             </td>
         </tr>
-
-        {{--        @endif--}}
+        {{--                                    @endif--}}
     @endforeach
     </tbody>
 </table>
-
+@else
+    <p style="text-align: center;"  class="text-center"><b style="color: red">BASKET EMPTY!!!</b></p>
+    <div class="text-center">
+        <img style="margin: 0 auto" src="{{ asset('images/Recycle-Bin-icon.png') }}">
+    </div>
+@endif
 
 
 

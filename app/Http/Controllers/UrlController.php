@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UrlRequest;
-use App\Models\Alert;
-use App\Models\Url;
-use App\Models\User;
 use App\Services\UrlService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 
 
 class UrlController extends Controller
 {
-    private $urlService;
+    private UrlService $urlService;
 
-
+    /**
+     * @param UrlService $urlService
+     */
     public function __construct(UrlService $urlService)
     {
         $this->urlService = $urlService;
@@ -25,20 +25,9 @@ class UrlController extends Controller
      * Display a listing of the resource.
      *
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
-         $urls = $this->urlService->initialData();
-
-        return view('urls.index', ['urls'=>$urls['urls'],'projects'=>$urls['projects'],'alerts'=>$urls['alerts']]);
-//        return view('urls.index', compact('urls','projects','alerts'));
-
-//       $urls = $this->urlRepository->userProjectAll();
-//
-//        $projects = $urls['project'];
-//        $urls = $urls['urls'];
-//        $alerts = Alert::all();
-//
-//        return view('urls.index', compact('urls', 'projects', 'alerts'));
+        return view('urls.index', ['urls' => $this->urlService->initialData()]);
     }
 
     /**
@@ -47,127 +36,68 @@ class UrlController extends Controller
      */
     public function store(UrlRequest $request): \Illuminate\Http\JsonResponse
     {
-        $url = new Url($request->validated());
-        $url->save();
-        return response()->json(['data' => $url]);
+        return response()->json(['data' => $this->urlService->storeUrl($request)]);
     }
 
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param $id
+     * @param int
      * @return string
      */
-    public function edit($id): string
+    public function edit(int $id): string
     {
-        $projects = $this->urlRepository->edit();
-        $urls = Url::find($id);
-        $alerts = Alert::all();
-
-        return view('urls.edit', compact('urls', 'projects', 'alerts'))->render();
+        return view('urls.edit', ['urls' => $this->urlService->editUrl($id)])->render();
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @param UrlRequest $request
+     * @param int $id
+     * @return RedirectResponse
      */
-    public function update(UrlRequest $request, $id): \Illuminate\Http\RedirectResponse
+    public function update(UrlRequest $request, int $id): RedirectResponse
     {
-        $urls = Url::find($id);
-        $urls->update($request->all());
+        $this->urlService->updateUrl($request, $id);
 
-        return redirect()->route('url.edit', $id)->with('success', 'Успешно обновлено.');
+        return redirect()->route('url.edit', $id)->with('success', 'Successfully updated.');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
+     * @param int $id
      * @return string
      */
-    public function destroy($id): string
+    public function destroy(int $id): string
     {
-
-        $url = Url::find($id);
-        if ($url) $url->delete();
-
-        $urls = $this->urlRepository->deleteUrl($url);
-
-        return view('ajax.ajaxUrlShow', compact('urls'))->render();
-
+        return view('ajax.ajaxUrlShow', ['urls' => $this->urlService->deleteUrl($id)])->render();
     }
 
     /**
-     * @param $id
-     * @return string
+     * @param Request $request
+     * @param int $id
+     * @return string|void
      */
-    protected function ajaxUrlProdForm(Request $request, $id): string
+    protected function ajaxUrlProdForm(Request $request, int $id)
     {
-
-        $urls = $this->urlRepository->ajaxUrlProdForm($id);
+        $urls = $this->urlService->ajaxCheckUrl($id);
 
         if ($request->ajax()) {
             return view('ajax.ajaxUrlShow', compact('urls'))->render();
         }
     }
 
-
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function ajaxCheckUrl(Request $request): \Illuminate\Http\JsonResponse
     {
-        $urls = Url::all();
-        $users = User::all();
-
-        $url = $request->url_check;
-
-        $status = $this->curl($url);
-
-//        $message = [];
-//        foreach ($urls as $value) {
-//            foreach ($users as $user) {
-//                if ($user->id == $value->id_user) {
-//                    if ($status == $value->status_code) {
-//
-//                        $message[] = [
-//                            'success ' => 'Success',
-//                            'user_name' => $user->name,
-//                            'id_user' => $user->id,
-//                            'url' => $value->url,
-//                            'code' => $value->status_code,
-//                        ];
-//                    } else {
-//                        $message[] = [
-//                            'success ' => 'Error',
-//                            'user_name' => $user->name,
-//                            'id_user' => $user->id,
-//                            'url' => $value->url,
-//                            'code' => $value->status_code,
-//                        ];
-//                    }
-//                }
-//            }
-//        }
+        $status = $this->urlService->curl($request->url_check);
 
         return response()->json(['status' => $status]);
     }
 
 
-
-    public function ping1()
-    {
-       $this->urlService->ping1();
-    }
-
-    public function ping2()
-    {
-        $this->urlService->ping2();
-    }
-
-    public function ping3()
-    {
-        $this->urlService->ping3();
-    }
 
 }
 //https://habr.com/ru/post/350778/

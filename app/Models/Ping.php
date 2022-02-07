@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Alert extends Model
+class Ping extends Model
 {
     use HasFactory;
-
-    public $timestamps = true;
-
+    public $timestamps = false;
     protected $fillable = [
-        'name',
-        'description'
+        'start1',
+        'start2',
+        'start3',
     ];
 }

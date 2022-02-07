@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    const URI = 'http://lara-test.local/';
 
     /* Проверка URL */
     function checkUrl() {
@@ -10,21 +9,13 @@ $(document).ready(function () {
 
             $(".error").remove();
             $('.status').remove();
-            if (url_check.length < 1) {
-                $('#url_label').after('<span class="error">Введите url</span>');
-                error = true;
-            }
 
-            var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-            if (res == null && !error) {
-                $('#url_label').after('<span class="error">Неверный url адрес</span>');
-                error = true;
-            }
+            error = errorUrl(url_check);
 
             if (error) return;
 
             $.ajax({
-                url: URI + 'url/ajax-check-url',
+                url: '/url/ajax-check-url',
                 type: "POST",
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -42,29 +33,20 @@ $(document).ready(function () {
                 }
 
             });
-            // if (!error) $('#url_check').val('');
-            $('#status_code').val('');
+
         });
     }
-
-
-    // document.getElementById("clearButton").onclick = function(e) {
-    //     document.getElementById("textInput").value = "";
-    // }
 
     /*  Выбор проектов */
     $('#project').on('change', () => {
         let id_project = $('#project option:selected').attr('id');
         console.log(id_project);
         $.ajax({
-            url: URI + 'url/ajax-url-form/' + id_project,
+            url: '/url/ajax-url-form/' + id_project,
             type: "GET",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
-            // data: {
-            //     id: id_project
-            // },
             success: function (response) {
                 $('#mytable').html(response);
                 checkUrl();
@@ -77,18 +59,18 @@ $(document).ready(function () {
 
         });
 
-        console.log(id_project)
     })
 
     checkUrl();
     /* Сохранение формы */
     $('#save_form_btn').on('click', function (event) {
 
-        var error = false;
+        let error = false;
 
         let url_check = $('#url_check').val();
         let time = $('#time').val();
-        let name = $('#name').val();
+        let title = $('#title').val();
+        let search_term = $('#search_term').val();
         let id_user = $('#id_user').val();
         let status_code = $('#status_code').val();
         let count_link = $('#count_link').val();
@@ -96,83 +78,68 @@ $(document).ready(function () {
         let choice = $('input[name="radio"]:checked').val();
         let id_proj = $('#id_project_input').val();
 
-        if (id_project == undefined) id_project = id_proj;
+        if (id_project === undefined) id_project = id_proj;
 
-        // console.log(id_project)
-        // console.log(time)
-        // console.log(name)
-        // console.log(status_code)
         $(".error").remove();
-        // $(".alert alert-danger").remove();
 
+        error = errorUrl(url_check);
 
-        if (url_check.length < 1) {
-            $('#url_label').after('<span class="error">Введите url</span>');
+        if (title.length < 1) {
+            $('#title_label').after('<span class="error">Enter the title</span>');
             error = true;
         }
 
-        var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-
-        if (res == null && !error) {
-            $('#url_label').after('<span class="error">Неверный url адрес</span>');
+        if (choice === undefined) {
+            $('#radio_label').after('<span class="error">Select button</span>');
             error = true;
         }
 
-        if (name.length < 1) {
-            $('#name_label').after('<span class="error">Введите название</span>');
+        if (time.length < 1) {
+            $('#time_label').after('<span class="error">Enter time</span>');
             error = true;
         }
-
-        if (choice == undefined) {
-            $('#radio_label').after('<span class="error">Выберите кнопку</span>');
-            error = true;
-        }
-
-        // if (time.length < 1) {
-        //     $('#time_label').after('<span class="error">Введите время</span>');
-        //     error = true;
-        // }
 
         if (time < 0) {
-            $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
+            $('#time_label').after('<span class="error">Time cannot be negative</span>');
             error = true;
         }
 
         if (time > 40) {
-            $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
+            $('#time_label').after('<span class="error">Time cannot be more than 40</span>');
             error = true;
         }
 
         if (status_code.length < 1) {
-            $('#code_label').after('<span class="error">Введите код</span>');
+            $('#code_label').after('<span class="error">Enter code</span>');
             error = true;
         }
 
-        if (status_code < 200 || status_code > 500) {
-            $('#code_label').after('<span class="error">Не верный код</span>');
+        if ((status_code < 200 || status_code > 1000) && status_code.length > 1) {
+            $('#code_label').after('<span class="error">Incorrect code</span>');
             error = true;
         }
 
         if (count_link.length < 1) {
-            $('#count_label').after('<span class="error">Введите колличество запросов</span>');
+            $('#count_label').after('<span class="error">Enter the number of requests</span>');
             error = true;
         }
 
-        var date_now = getActualFullDate();
+        let date_now = getActualFullDate();
 
         $("#error_mes").removeClass('text-center error_mes alert alert-danger');
 
         if (error) return;
 
         $.ajax({
-            url: URI + "url",
+            url: "url",
             type: "POST",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             data: {
                 url: url_check,
-                name: name,
+                title: title,
+                search_term: search_term,
                 time_out: time,
                 max_count_ping: count_link,
                 status_code: status_code,
@@ -191,7 +158,7 @@ $(document).ready(function () {
                     $('#mytable').append(`
                         <tr id="row_${data.id}">
                             <th scope="row">${data.id}</th>
-                            <td><a style="color: #2563eb" href="${data.url}">${data.name}</a></td>
+                            <td><a style="color: #2563eb" href="${data.url}">${data.title}</a></td>
                             <td>${date_now}</td>
                             <td>${data.time_out}</td>
                             <td>${data.status_code}</td>
@@ -205,7 +172,7 @@ $(document).ready(function () {
                                 </form>
                             </td>
                             <td>
-                               <button onclick="deleteUrl(${data.id},'${data.name}')">
+                               <button onclick="deleteUrl(${data.id},'${data.title}')">
                                   <i style="color: #eb2549" class="fas fa-trash-alt"></i>
                                </button>
                             </td>
@@ -213,25 +180,28 @@ $(document).ready(function () {
                 }
                 if (!error) {
                     $("#time").val("");
-                    $("#name").val("");
+                    $("#title").val("");
+                    $("#search_term").val("");
                     $("#url_check").val("");
                     $("#status_code").val("");
                     $("#count_link").val("");
                 }
 
             },
-            error: function (data) {
+            error: function (error) {
 
-                let errors = data.responseJSON.errors;
+                let errors = error.responseJSON.errors;
+                console.log(errors)
+                if (errors) {
+                    $('#error_mes').addClass('text-center error_mes alert alert-danger');
+                    for (let value of Object.values(errors)) {
+                        let ul = document.createElement('ul');
+                        let li = document.createElement('li');
+                        li.innerHTML = value[0];
+                        ul.appendChild(li);
+                        document.getElementById('error_mes').appendChild(ul);
 
-                $('#error_mes').addClass('text-center error_mes alert alert-danger');
-                for (let value of Object.values(errors)) {
-                    let ul = document.createElement('ul');
-                    let li = document.createElement('li');
-                    li.innerHTML = value[0];
-                    ul.appendChild(li);
-                    document.getElementById('error_mes').appendChild(ul);
-
+                    }
                 }
             }
         });
@@ -267,7 +237,7 @@ function deleteUrl(id, name) {
                         },
                         success: function (response) {
                             $('#mytable').html(response);
-                            // checkUrl();
+
                             console.log(response);
                         },
                         error: function (data) {
@@ -289,114 +259,52 @@ function deleteUrl(id, name) {
 
 }
 
-function editUrl(id) {
-    $.ajax({
-        url: 'url/' + id + '/edit',
-        type: "GET",
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-        },
-        success: function (response) {
-            $('.py-12').html(response);
-            console.log(response);
-        },
-        error: function (data) {
-            console.log(data);
-        }
+function deleteTrash(id, name) {
 
-    });
-}
+    $.confirm({
+        title: 'Удаление!',
+        content: 'Вы хотите удалить безвозвратно ' + name + ' ?',
+        buttons: {
 
-function updateButton(id) {
+            Удалить: {
+                btnClass: 'btn-red',
+                action: function () {
 
-    let url_check = $('#url_check').val();
-    let time = $('#time').val();
-    let name = $('#name').val();
-    let status_code = $('#status_code').val();
-    let count_link = $('#count_link').val();
-    let id_project = $('#project option:selected').attr('id');
-    let choice = $('input[name="id_alert"]:checked').val();
-    let id_proj = $('#id_project').val();
+                    // $.alert('Удалить!');
+                    console.log(id);
+                    $.ajax({
+                        url: '/delete-trash/' + id,
+                        type: "GET",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        },
+                        data: {
+                            _method: 'delete',
+                            id: id
+                        },
+                        success: function (response) {
+                            $('#basket_table').html(response);
+                            checkUrl();
 
-    if (id_project == undefined) id_project = id_proj;
+                            console.log(response);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
 
-    var error = false;
+                    });
+                },
 
-    if (url_check.length < 1) {
-        $('#url_label').after('<span class="error">Введите url</span>');
-        error = true;
-    }
-
-    var res = url_check.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-
-    if (res == null && !error) {
-        $('#url_label').after('<span class="error">Неверный url адрес</span>');
-        error = true;
-    }
-
-    if (name.length < 1) {
-        $('#name_label').after('<span class="error">Введите название</span>');
-        error = true;
-    }
-
-    if (choice == undefined) {
-        $('#radio_label').after('<span class="error">Выберите кнопку</span>');
-        error = true;
-    }
-
-    if (time.length < 1) {
-        $('#time_label').after('<span class="error">Введите время</span>');
-        error = true;
-    }
-
-    if (time < 0) {
-        $('#time_label').after('<span class="error">Время не может быть отрицательным</span>');
-        error = true;
-    }
-
-    if (time > 40) {
-        $('#time_label').after('<span class="error">Время не может быть больше 40</span>');
-        error = true;
-    }
-
-    if (status_code.length < 1) {
-        $('#code_label').after('<span class="error">Введите код</span>');
-        error = true;
-    }
-
-    if (status_code < 200 || status_code > 500) {
-        $('#code_label').after('<span class="error">Не верный код</span>');
-        error = true;
-    }
-
-    if (count_link.length < 1) {
-        $('#count_label').after('<span class="error">Введите колличество запросов</span>');
-        error = true;
-    }
-
-    if (error) return;
-
-    $.ajax({
-        url: 'url/' + id,
-        type: "POST",
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-        },
-        data: {
-            _method: 'PUT',
-            url: url_check,
-            name: name,
-            time_out: time,
-            max_count_ping: count_link,
-            status_code: status_code,
-            id_alert: choice,
-            id_project: id_project,
-        },
-        success: function (data) {
-            $('.py-12').html(data);
-            console.log(data)
+            },
+            Отменить: {
+                btnClass: 'btn-blue',
+                action: function () {
+                    // $.alert('Отменить!');
+                }
+            }
         }
     });
+
 }
 
 function addZero(i) {
@@ -407,18 +315,28 @@ function addZero(i) {
 }
 
 function getActualFullDate() {
-    var d = new Date();
-    var day = addZero(d.getDate());
-    var month = addZero(d.getMonth() + 1);
-    var year = addZero(d.getFullYear());
-    var h = addZero(d.getHours());
-    var m = addZero(d.getMinutes());
-    var s = addZero(d.getSeconds());
+    let d = new Date();
+    let day = addZero(d.getDate());
+    let month = addZero(d.getMonth() + 1);
+    let year = addZero(d.getFullYear());
+    let h = addZero(d.getHours());
+    let m = addZero(d.getMinutes());
+    let s = addZero(d.getSeconds());
     return year + "-" + month + "-" + day + " " + h + ":" + m + ":" + s;
 }
 
-// $('.btn_del').click(function (r){
-//     r.preventDefault();
-//     deleteUrl(this.dataset.id);
-// });
+function errorUrl(url_check) {
+    let error = false;
+    if (url_check.length < 1) {
+        $('#url_label').after('<span class="error">Enter url</span>');
+        error = true;
+    }
 
+    let res = url_check.match(/^(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    console.log(res)
+    if (res == null && !error) {
+        $('#url_label').after('<span class="error">Invalid url</span>');
+        error = true;
+    }
+    return error;
+}
