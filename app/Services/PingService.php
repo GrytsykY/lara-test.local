@@ -168,8 +168,7 @@ class PingService
      * @param array $params
      * @return int
      */
-    public
-    function curl(string $url, array $params = []): int
+    public function curl(string $url, array $params = []): int
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -192,8 +191,7 @@ class PingService
      * @param int $id
      * @param string $message
      */
-    protected
-    function tel_curl(int $id, string $message)
+    protected function tel_curl(int $id, string $message)
     {
         $botToken = env('TELEGRAM_BOT_TOKEN');
         $website = "https://api.telegram.org/bot" . $botToken;
@@ -209,8 +207,7 @@ class PingService
     /**
      * @return Carbon
      */
-    protected
-    function dateNow(): Carbon
+    protected function dateNow(): Carbon
     {
         $current = Carbon::now();
         $current->format('Y-m-d H:i:s');
@@ -221,8 +218,7 @@ class PingService
      * @param array $url
      * @param bool $searchTeam
      */
-    public
-    function answerAlertIsOk(array $url, bool $searchTeam): void
+    public function answerAlertIsOk(array $url, bool $searchTeam): void
     {
         $text = '';
         if ($searchTeam) {
@@ -242,8 +238,7 @@ class PingService
     /**
      * @param array $url
      */
-    public
-    function answerAlertIsNot(array $url): void
+    public function answerAlertIsNot(array $url): void
     {
         $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
