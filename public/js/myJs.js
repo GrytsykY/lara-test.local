@@ -1,42 +1,4 @@
 $(document).ready(function () {
-
-    /* Проверка URL */
-    function checkUrl() {
-        $('#check_url_btn').on('click', function () {
-            let error = false;
-            $('#status_code').val('');
-            let url_check = $('#url_check').val();
-
-            $(".error").remove();
-            $('.status').remove();
-
-            error = errorUrl(url_check);
-
-            if (error) return;
-
-            $.ajax({
-                url: '/url/ajax-check-url',
-                type: "POST",
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                },
-                data: {
-                    url_check: url_check
-                },
-                success: function (response) {
-                    // $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
-                    $('#status_code').val(`${response.status}`);
-                    console.log(response);
-                },
-                error: function (data) {
-                    console.log(data);
-                }
-
-            });
-
-        });
-    }
-
     /*  Выбор проектов */
     $('#project').on('change', () => {
         let id_project = $('#project option:selected').attr('id');
@@ -131,7 +93,7 @@ $(document).ready(function () {
         if (error) return;
 
         $.ajax({
-            url: "url",
+            url: "/url",
             type: "POST",
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -226,7 +188,7 @@ function deleteUrl(id, name) {
                     // $.alert('Удалить!');
                     console.log(id);
                     $.ajax({
-                        url: 'url/' + id,
+                        url: '/url/' + id,
                         type: "POST",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -283,9 +245,8 @@ function deleteTrash(id, name) {
                             id: id
                         },
                         success: function (response) {
-                            $('#basket_table').html(response);
                             checkUrl();
-
+                            $('#basket_table').html(response);
                             console.log(response);
                         },
                         error: function (data) {
@@ -332,11 +293,57 @@ function errorUrl(url_check) {
         error = true;
     }
 
-    let res = url_check.match(/^(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    let res = validURL(url_check);
     console.log(res)
-    if (res == null && !error) {
+    if (res === false && !error) {
         $('#url_label').after('<span class="error">Invalid url</span>');
         error = true;
     }
     return error;
+}
+
+/* Проверка URL */
+function checkUrl() {
+    $('#check_url_btn').on('click', function () {
+        let error = false;
+        $('#status_code').val('');
+        let url_check = $('#url_check').val();
+
+        $(".error").remove();
+        $('.status').remove();
+
+        error = errorUrl(url_check);
+        if (error) return;
+
+        $.ajax({
+            url: '/url/ajax-check-url',
+            type: "POST",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+            data: {
+                url_check: url_check
+            },
+            success: function (response) {
+                // $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
+                $('#status_code').val(`${response.status}`);
+                console.log(response);
+            },
+            error: function (data) {
+                console.log(data);
+            }
+
+        });
+
+    });
+}
+
+function validURL(str) {
+    let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
 }

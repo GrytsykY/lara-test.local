@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UrlRequest;
+use App\Services\PingService;
 use App\Services\UrlService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,13 +13,15 @@ use Illuminate\Support\Facades\Log;
 class UrlController extends Controller
 {
     private UrlService $urlService;
+    private PingService $pingService;
 
     /**
      * @param UrlService $urlService
      */
-    public function __construct(UrlService $urlService)
+    public function __construct(UrlService $urlService, PingService $pingService)
     {
         $this->urlService = $urlService;
+        $this->pingService = $pingService;
     }
 
     /**
@@ -92,7 +95,7 @@ class UrlController extends Controller
      */
     public function ajaxCheckUrl(Request $request): \Illuminate\Http\JsonResponse
     {
-        $status = $this->urlService->curl($request->url_check);
+        $status = $this->pingService->curl($request->url_check);
 
         return response()->json(['status' => $status]);
     }
