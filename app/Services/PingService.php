@@ -88,7 +88,6 @@ class PingService
 
             $this->pingRepository->startUpdate(2,0);
 
-            $this->pingRepository->$this->pingRepository->startUpdate(1,0);;
 
             $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
