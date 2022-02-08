@@ -41,7 +41,6 @@ class PingService
 
             $this->pingRepository->startUpdate(1,0);
 
-            set_time_limit(360);
             $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
 
             if (!empty($urls)) {
@@ -90,7 +89,7 @@ class PingService
             $this->pingRepository->startUpdate(2,0);
 
             $this->pingRepository->$this->pingRepository->startUpdate(1,0);;
-            set_time_limit(360);
+
             $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
             if (!empty($urls))
@@ -135,7 +134,7 @@ class PingService
         if ($start[0]['flag'] == 1) {
 
             $this->pingRepository->startUpdate(3,0);
-            set_time_limit(360);
+
             $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
             try {
 
