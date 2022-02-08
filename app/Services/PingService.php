@@ -84,11 +84,12 @@ class PingService
 
     public function ping2()
     {
-        $start = $this->pingRepository->start();
+        $start = $this->pingRepository->start(2);
+        if ($start[0]['flag'] == 1) {
 
-        if ($start[0]['start2'] == 1) {
+            $this->pingRepository->startUpdate(2,0);
 
-            $this->pingRepository->stopUpdate('start2');
+            $this->pingRepository->$this->pingRepository->startUpdate(1,0);;
             set_time_limit(360);
             $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
@@ -122,7 +123,7 @@ class PingService
                     }
                 } catch (Exception $e) {
                 } finally {
-                    $this->pingRepository->startUpdate('start2');
+                    $this->pingRepository->startUpdate(2,1);
                 }
         }
 
@@ -130,9 +131,10 @@ class PingService
 
     public function ping3()
     {
-        $start = $this->pingRepository->start();
-        if ($start[0]['start3'] == 1) {
-            $this->pingRepository->stopUpdate('start3');
+        $start = $this->pingRepository->start(3);
+        if ($start[0]['flag'] == 1) {
+
+            $this->pingRepository->startUpdate(3,0);
             set_time_limit(360);
             $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
             try {
@@ -152,7 +154,7 @@ class PingService
                 }
             } catch (Exception $e) {
             } finally {
-                $this->pingRepository->startUpdate('start3');
+                $this->pingRepository->startUpdate(3,1);
             }
         }
     }
