@@ -7,6 +7,7 @@ use App\Http\Requests\UrlRequest;
 use App\Interfaces\UrlRepositoryInterface;
 use App\Models\Url;
 use DB;
+use Illuminate\Support\Collection;
 
 class UrlRepository implements UrlRepositoryInterface
 {
@@ -60,18 +61,6 @@ class UrlRepository implements UrlRepositoryInterface
         return DB::table('urls')->where('id_project', '=', $id)->get()->map(function ($obj) {
             return get_object_vars($obj);
         })->toArray();
-    }
-
-    /**
-     * @param string $current
-     * @return \Illuminate\Support\Collection
-     */
-    public function selectUrlOutTimeAndLastPing(string $current): \Illuminate\Support\Collection
-    {
-        return DB::table("urls")
-            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
-            ->where('is_failed', '=', false)
-            ->get()->whereNull('deleted_at');
     }
 
     /**

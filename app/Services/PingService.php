@@ -34,12 +34,13 @@ class PingService
         $this->pingRepository = $pingRepository;
     }
 
+
     public function ping1()
     {
         $start = $this->pingRepository->start(1);
         if ($start[0]['flag'] == 1) {
 
-            $this->pingRepository->startUpdate(1,0);
+            $this->pingRepository->startUpdate(1, 0);
 
             $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
 
@@ -47,7 +48,7 @@ class PingService
 
                 try {
                     foreach ($urls as $url) {
-                        sleep(3);
+                        sleep(40);
                         $searchTeam = false;
                         if ($url['search_term'] != null) $searchTeam = true;
                         $status = $this->curl($url['url']);
@@ -72,8 +73,9 @@ class PingService
                     }
 
                 } catch (Exception $e) {
+                    throw new \Exception($e->getMessage());
                 } finally {
-                    $this->pingRepository->startUpdate(1,1);
+                    $this->pingRepository->startUpdate(1, 1);
                 }
 
 
@@ -86,12 +88,12 @@ class PingService
         $start = $this->pingRepository->start(2);
         if ($start[0]['flag'] == 1) {
 
-            $this->pingRepository->startUpdate(2,0);
-
-
             $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
-            if (!empty($urls))
+            if (!empty($urls)) {
+
+                $this->pingRepository->startUpdate(2, 0);
+
                 try {
 
                     foreach ($urls as $url) {
@@ -121,8 +123,9 @@ class PingService
                     }
                 } catch (Exception $e) {
                 } finally {
-                    $this->pingRepository->startUpdate(2,1);
+                    $this->pingRepository->startUpdate(2, 1);
                 }
+            }
         }
 
     }
@@ -132,27 +135,30 @@ class PingService
         $start = $this->pingRepository->start(3);
         if ($start[0]['flag'] == 1) {
 
-            $this->pingRepository->startUpdate(3,0);
-
             $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
-            try {
+            if (!empty($urls)) {
 
-                foreach ($urls as $url) {
-                    $searchTeam = false;
-                    if ($url['search_term'] != null) $searchTeam = true;
+                $this->pingRepository->startUpdate(3, 0);
 
-                    $status = $this->curl($url['url']);
+                try {
 
-                    if ($status == $url['status_code']) {
+                    foreach ($urls as $url) {
+                        $searchTeam = false;
+                        if ($url['search_term'] != null) $searchTeam = true;
 
-                        $this->answerAlertIsOk($url, $searchTeam);
+                        $status = $this->curl($url['url']);
+
+                        if ($status == $url['status_code']) {
+
+                            $this->answerAlertIsOk($url, $searchTeam);
+
+                        }
 
                     }
-
+                } catch (Exception $e) {
+                } finally {
+                    $this->pingRepository->startUpdate(3, 1);
                 }
-            } catch (Exception $e) {
-            } finally {
-                $this->pingRepository->startUpdate(3,1);
             }
         }
     }
@@ -162,7 +168,8 @@ class PingService
      * @param array $params
      * @return int
      */
-    public function curl(string $url, array $params = []): int
+    public
+    function curl(string $url, array $params = []): int
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -185,7 +192,8 @@ class PingService
      * @param int $id
      * @param string $message
      */
-    protected function tel_curl(int $id, string $message)
+    protected
+    function tel_curl(int $id, string $message)
     {
         $botToken = env('TELEGRAM_BOT_TOKEN');
         $website = "https://api.telegram.org/bot" . $botToken;
@@ -201,7 +209,8 @@ class PingService
     /**
      * @return Carbon
      */
-    protected function dateNow(): Carbon
+    protected
+    function dateNow(): Carbon
     {
         $current = Carbon::now();
         $current->format('Y-m-d H:i:s');
@@ -212,7 +221,8 @@ class PingService
      * @param array $url
      * @param bool $searchTeam
      */
-    public function answerAlertIsOk(array $url, bool $searchTeam): void
+    public
+    function answerAlertIsOk(array $url, bool $searchTeam): void
     {
         $text = '';
         if ($searchTeam) {
@@ -223,7 +233,7 @@ class PingService
         }
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)
-            $this->tel_curl($project[0]['chat_id'], 'Сайт "'. $url['title'] . '" работает! ' . $text);
+            $this->tel_curl($project[0]['chat_id'], 'Сайт "' . $url['title'] . '" работает! ' . $text);
 
         $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
@@ -232,12 +242,13 @@ class PingService
     /**
      * @param array $url
      */
-    public function answerAlertIsNot(array $url): void
+    public
+    function answerAlertIsNot(array $url): void
     {
         $alert = $this->alertRepository->getByIdAlert($url['id_alert']);
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)
-            $this->tel_curl($project[0]['chat_id'], 'Сайт "'. $url['title'] . '" не  работает!!! '. $alert[0]['name'] .
+            $this->tel_curl($project[0]['chat_id'], 'Сайт "' . $url['title'] . '" не  работает!!! ' . $alert[0]['name'] .
                 ' ' . $alert[0]['description']);
 
         $this->urlRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());

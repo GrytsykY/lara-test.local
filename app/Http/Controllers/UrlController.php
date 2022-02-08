@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UrlRequest;
 use App\Services\PingService;
 use App\Services\UrlService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +18,7 @@ class UrlController extends Controller
 
     /**
      * @param UrlService $urlService
+     * @param PingService $pingService
      */
     public function __construct(UrlService $urlService, PingService $pingService)
     {
@@ -37,7 +39,7 @@ class UrlController extends Controller
      * Store a newly created resource in storage.
      *
      */
-    public function store(UrlRequest $request): \Illuminate\Http\JsonResponse
+    public function store(UrlRequest $request): JsonResponse
     {
         return response()->json(['data' => $this->urlService->storeUrl($request)]);
     }
@@ -91,9 +93,9 @@ class UrlController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function ajaxCheckUrl(Request $request): \Illuminate\Http\JsonResponse
+    public function ajaxCheckUrl(Request $request): JsonResponse
     {
         $status = $this->pingService->curl($request->url_check);
 

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Services\UrlService;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class BasketController extends Controller
 {
@@ -17,9 +21,9 @@ class BasketController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+     * @return Factory|View|Application
      */
-    public function basket(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function basket(): Factory|View|Application
     {
         $urls = $this->urlService->basket();
         return view('baskets.basket', compact('urls'));
@@ -27,9 +31,9 @@ class BasketController extends Controller
 
     /**
      * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    public function restore(int $id): \Illuminate\Http\RedirectResponse
+    public function restore(int $id): RedirectResponse
     {
         $this->urlService->restore($id);
         return redirect()->route('basket');
