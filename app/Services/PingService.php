@@ -48,7 +48,7 @@ class PingService
 
                 try {
                     foreach ($urls as $url) {
-                        sleep(40);
+
                         $searchTeam = false;
                         if ($url['search_term'] != null) $searchTeam = true;
                         $status = $this->curl($url['url']);
