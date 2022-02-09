@@ -3,6 +3,7 @@
 namespace App\Interfaces;
 
 use App\Http\Requests\UrlRequest;
+use Carbon\Carbon;
 
 interface UrlRepositoryInterface
 {
@@ -49,40 +50,40 @@ interface UrlRepositoryInterface
     public function delete(int $id): array;
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function getTimeOutAndLastPing(string $current): array;
+    public function getTimeOutAndLastPing(Carbon $current): array;
 
     /**
      * @param int $id
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingNull(int $id, string $current): void;
+    public function updatePingNull(int $id, Carbon  $current): void;
 
     /**
      * @param array $url
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingCounterFieldOneSentAlertOne(array $url, string $current): void;
+    public function updatePingCounterFieldOneSentAlertOne(array $url, Carbon  $current): void;
 
     /**
      * @param array $url
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingCounterFieldOne(array $url, string $current): void;
+    public function updatePingCounterFieldOne(array $url, Carbon  $current): void;
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function selectLastPingAndOneMinute(string $current): array;
+    public function selectLastPingAndOneMinute(Carbon  $current): array;
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(string $current): array;
+    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(Carbon  $current): array;
 
     /**
      * @return array

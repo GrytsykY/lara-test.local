@@ -99,9 +99,9 @@ class UrlController extends Controller
      */
     public function ajaxCheckUrl(Request $request): JsonResponse
     {
-        $status = $this->pingService->curl($request->url_check);
+        $data = $this->urlService->validatedUrl($request->url_check);
 
-        return response()->json(['status' => $status]);
+        return response()->json($data);
     }
 
 

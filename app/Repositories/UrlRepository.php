@@ -6,6 +6,7 @@ namespace App\Repositories;
 use App\Http\Requests\UrlRequest;
 use App\Interfaces\UrlRepositoryInterface;
 use App\Models\Url;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Collection;
 
@@ -94,13 +95,13 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function getTimeOutAndLastPing(string $current): array
+    public function getTimeOutAndLastPing(Carbon $current): array
     {
         return DB::table("urls")
-            ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
+            ->whereRaw("'$current'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")
             ->where('is_failed', '=', 0)
             ->get()
             ->whereNull('deleted_at')
@@ -111,9 +112,9 @@ class UrlRepository implements UrlRepositoryInterface
 
     /**
      * @param int $id
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingNull(int $id, string $current): void
+    public function updatePingNull(int $id, Carbon $current): void
     {
         \Log::debug($current);
         DB::table('urls')
@@ -128,9 +129,9 @@ class UrlRepository implements UrlRepositoryInterface
 
     /**
      * @param array $url
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingCounterFieldOneSentAlertOne(array $url, string $current): void
+    public function updatePingCounterFieldOneSentAlertOne(array $url, Carbon $current): void
     {
         DB::table('urls')
             ->where('id', '=', $url['id'])
@@ -144,9 +145,9 @@ class UrlRepository implements UrlRepositoryInterface
 
     /**
      * @param array $url
-     * @param string $current
+     * @param Carbon $current
      */
-    public function updatePingCounterFieldOne(array $url, string $current): void
+    public function updatePingCounterFieldOne(array $url, Carbon $current): void
     {
         DB::table('urls')
             ->where('id', '=', $url['id'])
@@ -158,10 +159,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function selectLastPingAndOneMinute(string $current): array
+    public function selectLastPingAndOneMinute(Carbon $current): array
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL 1 MINUTE)")
@@ -175,10 +176,10 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param string $current
+     * @param Carbon $current
      * @return array
      */
-    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(string $current): array
+    public function getUrlOutTimeAndLastPingFieldOneSentAlertOne(Carbon $current): array
     {
         return DB::table("urls")
             ->whereRaw("'$current.'>=DATE_ADD(urls.last_ping,INTERVAL urls.time_out MINUTE)")

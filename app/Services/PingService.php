@@ -40,11 +40,11 @@ class PingService
         $start = $this->pingRepository->start(1);
         if ($start[0]['flag'] == 1) {
 
-            $this->pingRepository->startUpdate(1, 0);
-
             $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
 
             if (!empty($urls)) {
+
+                $this->pingRepository->startUpdate(1, 0);
 
                 try {
                     foreach ($urls as $url) {
@@ -73,7 +73,7 @@ class PingService
                     }
 
                 } catch (Exception $e) {
-                    throw new \Exception($e->getMessage());
+//                    throw new \Exception($e->getMessage());
                 } finally {
                     $this->pingRepository->startUpdate(1, 1);
                 }
@@ -168,7 +168,7 @@ class PingService
      * @param array $params
      * @return int
      */
-    public function curl(string $url, array $params = []): int
+    public function curl(string $url, array $params = [])
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -182,9 +182,12 @@ class PingService
         }
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
-        return $status;
+
+        $response = json_decode($response,1);
+        $response['status'] = $status;
+        curl_close($ch);
+        return $response;
     }
 
     /**
@@ -222,10 +225,10 @@ class PingService
     {
         $text = '';
         if ($searchTeam) {
-            if (strpos(file_get_contents($url['url']), $url['search_term']))
-                $text = htmlspecialchars("Есть такое слово: " . $url['search_term']);
+            if ((strpos(file_get_contents($url['url']), $url['search_term'])) === true)
+                $text = "Есть такое слово: " . $url['search_term'];
             else
-                $text = htmlspecialchars("Нет такого слова (или текста): " . $url['search_term']);
+                $text = "Нет такого слова (или текста): " . $url['search_term'];
         }
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)

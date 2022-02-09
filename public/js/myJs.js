@@ -312,7 +312,7 @@ function checkUrl() {
         $(".error").remove();
         $('.status').remove();
 
-        error = errorUrl(url_check);
+        // error = errorUrl(url_check);
         if (error) return;
 
         $.ajax({
@@ -325,9 +325,10 @@ function checkUrl() {
                 url_check: url_check
             },
             success: function (response) {
-                // $('#url_status').after(`<span style="color: #2563eb" class="status">Ответ сервера код: ${response.status}</span>`);
                 $('#status_code').val(`${response.status}`);
-                console.log(response);
+                if (response.error)
+                $('#url_label').after('<span class="error">Invalid URL</span>');
+                console.log(response.error);
             },
             error: function (data) {
                 console.log(data);
@@ -339,7 +340,7 @@ function checkUrl() {
 }
 
 function validURL(str) {
-    let pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    let pattern = new RegExp('^(https?:\\/\\/www\\.)?'+ // protocol
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
         '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path

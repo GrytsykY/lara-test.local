@@ -14,6 +14,7 @@ use JetBrains\PhpStorm\ArrayShape;
 class UrlService extends BaseService
 {
     protected UrlRepository $urlRepository;
+    protected PingService $pingService;
     protected ProjectRepository $projectRepository;
     protected AlertRepository $alertRepository;
     protected PingRepository $pingRepository;
@@ -27,13 +28,15 @@ class UrlService extends BaseService
     public function __construct(UrlRepository     $urlRepository,
                                 ProjectRepository $projectRepository,
                                 AlertRepository   $alertRepository,
-                                PingRepository $pingRepository
+                                PingRepository $pingRepository,
+                                PingService $pingService
     )
     {
         $this->urlRepository = $urlRepository;
         $this->projectRepository = $projectRepository;
         $this->alertRepository = $alertRepository;
         $this->pingRepository = $pingRepository;
+        $this->pingService = $pingService;
     }
 
 
@@ -144,5 +147,23 @@ class UrlService extends BaseService
     public function deleteTrash(int $id): array
     {
         return $this->urlRepository->deleteTrash($id);
+    }
+
+    #[ArrayShape(['status' => "mixed", 'error' => "string"])]
+    public function validatedUrl($url): array
+    {
+        $status = [];
+        $error = '';
+        $re = '/^(https?:\/\/www\.)?((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(\:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(\#[-a-z\d_]*)?$/iu';
+        $preg = preg_match($re, $url);
+
+        if ($preg) {
+            $data = $this->pingService->curl($url);
+            $status = $data['status'];
+        }
+        else $error = 'Invalid URL';
+        $data = ['status' => $status, 'error' => $error];
+
+        return $data;
     }
 }
