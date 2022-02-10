@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ping extends Model
+class Employment extends Model
 {
     use HasFactory;
-    public $timestamps = false;
+
+    public $timestamps = true;
+
     protected $fillable = [
-        'start1',
-        'start2',
-        'start3',
+        'title',
+        'flag',
     ];
 }

@@ -56,7 +56,7 @@ class UrlService extends BaseService
             ];
 
         return [
-            'urls' => $this->urlRepository->getUrlProjectIdOneAll(),
+            'urls' => $this->urlRepository->getUrlByIdProject(1),
             'projects' => $this->projectRepository->getProjectAll(),
             'alerts' => $this->alertRepository->getAlertAll()
         ];
@@ -64,10 +64,10 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @return array
      */
-    public function storeUrl(UrlRequest $request): array
+    public function storeUrl(array $request): array
     {
         return $this->urlRepository->store($request);
     }
@@ -97,11 +97,11 @@ class UrlService extends BaseService
     }
 
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @param int $id
      * @return bool
      */
-    public function updateUrl(UrlRequest $request, int $id): bool
+    public function updateUrl(array $request, int $id): bool
     {
         return $this->urlRepository->update($request, $id);
     }
@@ -110,9 +110,11 @@ class UrlService extends BaseService
      * @param int $id
      * @return array
      */
+    #[ArrayShape(['urls' => "array", 'projects' => "array", 'alerts' => "array"])]
     public function deleteUrl(int $id): array
     {
-        return $this->urlRepository->delete($id);
+        $this->urlRepository->delete($id);
+        return $this->initialData();
     }
 
     /**
@@ -166,4 +168,5 @@ class UrlService extends BaseService
 
         return $data;
     }
+
 }

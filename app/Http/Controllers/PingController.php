@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PingService;
-use Database\Seeders\PingSeeder;
+use Database\Seeders\EmploymentSeeder;
 
 class PingController extends Controller
 {

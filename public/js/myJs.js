@@ -312,7 +312,7 @@ function checkUrl() {
         $(".error").remove();
         $('.status').remove();
 
-        // error = errorUrl(url_check);
+        error = errorUrl(url_check);
         if (error) return;
 
         $.ajax({
@@ -335,6 +335,7 @@ function checkUrl() {
             }
 
         });
+        $('#url_label').after('<span class="error"></span>');
 
     });
 }

@@ -19,7 +19,7 @@
     <tbody>
     @php $count = 0; @endphp
 {{--    @dd($urls)--}}
-    @foreach($urls as $key=> $data)
+    @foreach($urls['urls'] as $key=> $data)
         {{--        @if(Auth::user()->id_project == $data->id_project)--}}
         @php $count++; @endphp
 

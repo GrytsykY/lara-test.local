@@ -6,17 +6,17 @@ namespace App\Interfaces;
 interface PingRepositoryInterface
 {
     /**
-     * @param int $id
+     * @param string $title
      * @return array
      */
-    public function start(int $id): array;
+    public function start(string $title): array;
 
     /**
-     * @param int $id
+     * @param string $title
      * @param bool $flag
      * @return bool
      */
-    public function startUpdate(int $id, bool $flag): bool;
+    public function startUpdate(string $title, bool $flag): bool;
 
 
 }

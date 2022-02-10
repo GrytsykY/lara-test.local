@@ -7,6 +7,7 @@ use App\Repositories\PingRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UrlRepository;
 use Carbon\Carbon;
+use JetBrains\PhpStorm\ArrayShape;
 use mysql_xdevapi\Exception;
 
 class PingService
@@ -37,25 +38,19 @@ class PingService
 
     public function ping1()
     {
-        $start = $this->pingRepository->start(1);
+        $start = $this->pingRepository->start('ping-1');
         if ($start[0]['flag'] == 1) {
-
-            $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
-
-            if (!empty($urls)) {
-
-                $this->pingRepository->startUpdate(1, 0);
-
-                try {
+            $this->pingRepository->startUpdate('ping-1', 0);
+            try {
+                $urls = $this->urlRepository->getTimeOutAndLastPing($this->dateNow());
+                if (!empty($urls)) {
                     foreach ($urls as $url) {
+                        $data = $this->curl($url['url']);
+                        if ($url['search_term']) $this->searchWordAlert($data['response'], $url);
 
-                        $searchTeam = false;
-                        if ($url['search_term'] != null) $searchTeam = true;
-                        $status = $this->curl($url['url']);
+                        if ($data['status'] == $url['status_code']) {
 
-                        if ($status == $url['status_code']) {
-
-                            $this->answerAlertIsOk($url, $searchTeam);
+                            $this->answerAlertIsOk($url);
                             $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
                         } else {
@@ -71,40 +66,31 @@ class PingService
                         }
 
                     }
-
-                } catch (Exception $e) {
-//                    throw new \Exception($e->getMessage());
-                } finally {
-                    $this->pingRepository->startUpdate(1, 1);
                 }
-
-
+            } catch (Exception $e) {
+//                    throw new \Exception($e->getMessage());
+            } finally {
+                $this->pingRepository->startUpdate('ping-1', 1);
             }
         }
     }
 
     public function ping2()
     {
-        $start = $this->pingRepository->start(2);
+        $start = $this->pingRepository->start('ping-2');
         if ($start[0]['flag'] == 1) {
+            $this->pingRepository->startUpdate('ping-2', 0);
+            try {
+                $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
 
-            $urls = $this->urlRepository->selectLastPingAndOneMinute($this->dateNow());
-
-            if (!empty($urls)) {
-
-                $this->pingRepository->startUpdate(2, 0);
-
-                try {
-
+                if (!empty($urls)) {
                     foreach ($urls as $url) {
-                        $searchTeam = false;
-                        if ($url['search_term'] != null) $searchTeam = true;
+                        $data = $this->curl($url['url']);
+                        if ($url['search_term']) $this->searchWordAlert($data['response'], $url);
 
-                        $status = $this->curl($url['url']);
+                        if ($data['status'] == $url['status_code']) {
 
-                        if ($status == $url['status_code']) {
-
-                            $this->answerAlertIsOk($url, $searchTeam);
+                            $this->answerAlertIsOk($url);
 
                             $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
@@ -121,10 +107,11 @@ class PingService
                         }
 
                     }
-                } catch (Exception $e) {
-                } finally {
-                    $this->pingRepository->startUpdate(2, 1);
+
                 }
+            } catch (Exception $e) {
+            } finally {
+                $this->pingRepository->startUpdate('ping-2', 1);
             }
         }
 
@@ -132,33 +119,27 @@ class PingService
 
     public function ping3()
     {
-        $start = $this->pingRepository->start(3);
+        $start = $this->pingRepository->start('ping-3');
         if ($start[0]['flag'] == 1) {
-
-            $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
-            if (!empty($urls)) {
-
-                $this->pingRepository->startUpdate(3, 0);
-
-                try {
+            $this->pingRepository->startUpdate('ping-3', 0);
+            try {
+                $urls = $this->urlRepository->getUrlOutTimeAndLastPingFieldOneSentAlertOne($this->dateNow());
+                if (!empty($urls)) {
 
                     foreach ($urls as $url) {
-                        $searchTeam = false;
-                        if ($url['search_term'] != null) $searchTeam = true;
+                        $data = $this->curl($url['url']);
+                        if ($url['search_term']) $this->searchWordAlert($data['response'], $url);
 
-                        $status = $this->curl($url['url']);
+                        if ($data['status'] == $url['status_code']) {
 
-                        if ($status == $url['status_code']) {
-
-                            $this->answerAlertIsOk($url, $searchTeam);
+                            $this->answerAlertIsOk($url);
 
                         }
-
                     }
-                } catch (Exception $e) {
-                } finally {
-                    $this->pingRepository->startUpdate(3, 1);
                 }
+            } catch (Exception $e) {
+            } finally {
+                $this->pingRepository->startUpdate('ping-3', 1);
             }
         }
     }
@@ -166,15 +147,18 @@ class PingService
     /**
      * @param string $url
      * @param array $params
-     * @return int
+     * @return array
      */
-    public function curl(string $url, array $params = [])
+    #[ArrayShape(['status' => "mixed", 'response' => "bool|string"])]
+    public function curl(string $url, array $params = []): array
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 90);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         if (!empty($params)) {
             curl_setopt($ch, CURLOPT_HEADER, false);
             curl_setopt($ch, CURLOPT_POST, 1);
@@ -183,11 +167,10 @@ class PingService
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-
-        $response = json_decode($response,1);
-        $response['status'] = $status;
+        $data = ['status' => $status, 'response' => $response];
         curl_close($ch);
-        return $response;
+
+        return $data;
     }
 
     /**
@@ -219,20 +202,12 @@ class PingService
 
     /**
      * @param array $url
-     * @param bool $searchTeam
      */
-    public function answerAlertIsOk(array $url, bool $searchTeam): void
+    public function answerAlertIsOk(array $url): void
     {
-        $text = '';
-        if ($searchTeam) {
-            if ((strpos(file_get_contents($url['url']), $url['search_term'])) === true)
-                $text = "Есть такое слово: " . $url['search_term'];
-            else
-                $text = "Нет такого слова (или текста): " . $url['search_term'];
-        }
         $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
         if ($project)
-            $this->tel_curl($project[0]['chat_id'], 'Сайт "' . $url['title'] . '" работает! ' . $text);
+            $this->tel_curl($project[0]['chat_id'], 'Сайт "' . $url['title'] . '" работает! ');
 
         $this->urlRepository->updatePingNull($url['id'], $this->dateNow());
 
@@ -250,5 +225,23 @@ class PingService
                 ' ' . $alert[0]['description']);
 
         $this->urlRepository->updatePingCounterFieldOneSentAlertOne($url, $this->dateNow());
+    }
+
+    /**
+     * @param string $data
+     * @param array $url
+     * @return void
+     */
+    public function searchWordAlert(string $data, array $url): void
+    {
+        $text = '';
+        if ((strpos($data, $url['search_term'])))
+            $text = " Есть такое слово: " . $url['search_term'];
+        else
+            $text = " Нет такого слова (или текста): " . $url['search_term'];
+
+        $project = $this->projectRepository->getProjectByIdProject($url['id_project']);
+        if ($project)
+            $this->tel_curl($project[0]['chat_id'],'На сайте ' . $url['title'] . $text);
     }
 }

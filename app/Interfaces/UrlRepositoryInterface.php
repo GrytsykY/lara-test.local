@@ -14,10 +14,10 @@ interface UrlRepositoryInterface
     public function getUrlByIdProject(int $idProject): array;
 
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @return array
      */
-    public function store(UrlRequest $request): array;
+    public function store(array $request): array;
 
     /**
      * @param int $id
@@ -26,28 +26,22 @@ interface UrlRepositoryInterface
     public function edit(int $id): array;
 
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @param int $id
      * @return bool
      */
-    public function update(UrlRequest $request, int $id): bool;
+    public function update(array $request, int $id): bool;
 
     /**
      * @param int $id
      * @return array
      */
     public function ajaxUrlShowTable(int $id): array;
-
-    /**
-     * @return array
-     */
-    public function getUrlProjectIdOneAll(): array;
-
+    
     /**
      * @param int $id
-     * @return array
      */
-    public function delete(int $id): array;
+    public function delete(int $id): void;
 
     /**
      * @param Carbon $current

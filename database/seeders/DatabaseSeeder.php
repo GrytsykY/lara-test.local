@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             AlertSeeder::class,
             ProjectSeeder::class,
             UserSeeder::class,
-            PingSeeder::class
+            EmploymentSeeder::class
         ]);
     }
 }

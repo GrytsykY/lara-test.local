@@ -3,22 +3,20 @@
 namespace App\Repositories;
 
 
-use App\Http\Requests\UrlRequest;
 use App\Interfaces\UrlRepositoryInterface;
 use App\Models\Url;
 use Carbon\Carbon;
 use DB;
-use Illuminate\Support\Collection;
 
 class UrlRepository implements UrlRepositoryInterface
 {
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @return array
      */
-    public function store(UrlRequest $request): array
+    public function store(array $request): array
     {
-        $url = new Url($request->validated());
+        $url = new Url($request);
         $url->save();
         return $url->toArray();
     }
@@ -33,24 +31,23 @@ class UrlRepository implements UrlRepositoryInterface
     }
 
     /**
-     * @param UrlRequest $request
+     * @param array $request
      * @param int $id
      * @return bool
      */
-    public function update(UrlRequest $request, int $id):bool
+    public function update(array $request, int $id):bool
     {
-        return Url::find($id)->update($request->all());
+        return Url::find($id)->update($request);
     }
 
     /**
      * @param int $id
-     * @return array
+     * @return void
      */
-    public function delete(int $id): array
+    public function delete(int $id): void
     {
         $url = Url::find($id);
         $url->delete();
-        return $this->urlAll($url);
     }
 
     /**
@@ -77,21 +74,6 @@ class UrlRepository implements UrlRepositoryInterface
             ->map(function ($obj) {
             return get_object_vars($obj);
         })->toArray();
-    }
-
-    /**
-     * @return array
-     */
-    public function getUrlProjectIdOneAll(): array
-    {
-        return DB::table('urls')
-            ->orderBy('id', 'asc')
-            ->where('id_project', '=', 1)
-            ->get()
-            ->whereNull('deleted_at')
-            ->map(function ($obj) {
-                return get_object_vars($obj);
-            })->toArray();
     }
 
     /**
@@ -196,10 +178,10 @@ class UrlRepository implements UrlRepositoryInterface
      * @param Url $url
      * @return array
      */
-    protected function urlAll(Url $url): array
+    protected function urlAll(int $idProject): array
     {
         return DB::table('urls')
-            ->where('id_project', '=', $url->id_project)
+            ->where('id_project', '=', $idProject)
             ->get()
             ->whereNull('deleted_at')
             ->map(function ($obj) {

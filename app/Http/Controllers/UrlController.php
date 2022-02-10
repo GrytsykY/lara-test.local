@@ -34,6 +34,7 @@ class UrlController extends Controller
      */
     public function index(): Factory|View|Application
     {
+//        dd(url('https://www.php.net/'));
         return view('urls.index', ['urls' => $this->urlService->initialData()]);
     }
 
@@ -43,7 +44,7 @@ class UrlController extends Controller
      */
     public function store(UrlRequest $request): JsonResponse
     {
-        return response()->json(['data' => $this->urlService->storeUrl($request)]);
+        return response()->json(['data' => $this->urlService->storeUrl($request->validated())]);
     }
 
 
@@ -65,7 +66,7 @@ class UrlController extends Controller
      */
     public function update(UrlRequest $request, int $id): RedirectResponse
     {
-        $this->urlService->updateUrl($request, $id);
+        $this->urlService->updateUrl($request->validated(), $id);
 
         return redirect()->route('url.edit', $id)->with('success', 'Successfully updated.');
     }
@@ -86,7 +87,7 @@ class UrlController extends Controller
      */
     protected function ajaxUrlProdForm(Request $request, int $id)
     {
-        $urls = $this->urlService->ajaxCheckUrl($id);
+        $urls['urls'] = $this->urlService->ajaxCheckUrl($id);
 
         if ($request->ajax()) {
             return view('ajax.ajaxUrlShow', compact('urls'))->render();
@@ -103,7 +104,6 @@ class UrlController extends Controller
 
         return response()->json($data);
     }
-
 
 
 }

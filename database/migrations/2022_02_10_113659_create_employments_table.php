@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePingsTable extends Migration
+class CreateEmploymentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreatePingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('pings', function (Blueprint $table) {
+        Schema::create('employments', function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->string('title');
             $table->boolean('flag');
+            $table->timestamps();
         });
     }
 
@@ -27,6 +28,6 @@ class CreatePingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pings');
+        Schema::dropIfExists('employments');
     }
 }
